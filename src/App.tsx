@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { ContactShadows, OrbitControls, Sky, useTexture } from '@react-three/drei'
-import { BufferGeometry, CanvasTexture, DoubleSide, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace } from 'three'
+import { BufferGeometry, CanvasTexture, CatmullRomCurve3, DoubleSide, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace, TubeGeometry, Vector3 } from 'three'
 import { ArrowLeft, ArrowRight, Camera, Check, Mail, Moon, Move3D, Pencil, RotateCcw, SlidersHorizontal, Sun, X } from 'lucide-react'
 import './App.css'
 
@@ -39,9 +39,9 @@ const frameColors = [
 ] as const
 
 const lightingTypes = [
-  { id: 'straight', label: 'Foco recto', description: 'Brazo vertical sobre el lateral' },
-  { id: 'v', label: 'Foco en V', description: 'Brazos inclinados hacia la pista' },
-  { id: 'none', label: 'Sin focos', description: 'Solo estructura' },
+  { id: 'ingode', label: 'Ingode', description: 'Diseño exclusivo de ingeniería y estética, creado por el equipo Ingode.' },
+  { id: 'curved', label: 'Curved', description: 'Brazo curvo de diseño elegante, integrado en entornos exclusivos.' },
+  { id: 'straight', label: 'Straight', description: 'Diseño clásico y robusto para espacios reducidos.' },
 ] as const
 
 type CourtConfiguration = {
@@ -190,7 +190,7 @@ function CourtScene({ night, court }: { night: boolean; court: CourtConfiguratio
       <Sky distance={90} sunPosition={night ? [0, -1, 0] : [-0.35, 0.72, 0.45]} turbidity={night ? 2 : 5} rayleigh={night ? 0.25 : 1.4} mieCoefficient={0.004} mieDirectionalG={0.78} />
       <hemisphereLight args={['#e9f7ee', '#38443a', night ? 0.62 : 2.1]} />
       <directionalLight position={[-7, 15, 8]} intensity={night ? 0.22 : 3.2} castShadow shadow-mapSize={[2048, 2048]} />
-      {court.lighting !== 'none' && floodlightPositions.map(([x, y, z]) => (
+      {floodlightPositions.map(([x, y, z]) => (
         <pointLight key={`${x}-${z}`} position={[x, y, z]} intensity={night ? 18 : 0.3} distance={night ? 24 : 6} color="#f1f8d6" decay={2} />
       ))}
 
@@ -323,23 +323,46 @@ function LogoSigns() {
 }
 
 function Floodlights({ night, type, frameColor }: { night: boolean; type: CourtConfiguration['lighting']; frameColor: string }) {
-  if (type === 'none') return null
+  const ingodeBrace = useMemo(() => new TubeGeometry(
+    new CatmullRomCurve3([
+      new Vector3(0, 0.95, 0),
+      new Vector3(-0.46, 1.48, 0),
+      new Vector3(-0.46, 2.18, 0),
+    ]),
+    12,
+    0.045,
+    8,
+    false,
+  ), [])
+  const curvedArm = useMemo(() => new TubeGeometry(
+    new CatmullRomCurve3([
+      new Vector3(0, 0.45, 0),
+      new Vector3(0.2, 1.8, 0),
+      new Vector3(-0.05, 3.15, 0),
+      new Vector3(-0.62, 4.35, 0),
+      new Vector3(-1.02, 5.45, 0),
+    ]),
+    32,
+    0.05,
+    8,
+    false,
+  ), [])
 
   return (
     <group>
       {[-1, 1].flatMap((end) => [-1, 1].map((side) => (
         <group key={`flood-${end}-${side}`} position={[end * 10.85, 0, side * 5.9]}>
           <mesh position={[0, 2.85, 0]}><cylinderGeometry args={[0.055, 0.085, 5.7, 10]} /><meshStandardMaterial color={frameColor} metalness={0.72} roughness={0.32} /></mesh>
-          {type === 'straight' ? (
-            <mesh position={[-end * 0.3, 5.8, 0]} rotation={[0, 0, end * 0.11]}><boxGeometry args={[0.78, 0.16, 0.36]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>
-          ) : (
-            [-1, 1].map((arm) => (
-              <group key={`v-arm-${arm}`} position={[-end * 0.3, 5.62, arm * 0.12]} rotation={[0, 0, arm * 0.36]}>
-                <mesh position={[0, 0.25, 0]}><cylinderGeometry args={[0.035, 0.045, 0.65, 8]} /><meshStandardMaterial color={frameColor} metalness={0.55} roughness={0.38} /></mesh>
-                <mesh position={[0, 0.62, 0]}><boxGeometry args={[0.68, 0.14, 0.28]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>
-              </group>
-            ))
-          )}
+          {type === 'ingode' && <>
+            <mesh geometry={ingodeBrace} scale={[end, 1, 1]}><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>
+            <mesh position={[-end * 0.3, 5.48, 0]} rotation={[0, 0, end * 0.12]}><boxGeometry args={[0.14, 0.72, 0.14]} /><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>
+            <mesh position={[-end * 0.52, 5.8, 0]}><boxGeometry args={[0.72, 0.16, 0.34]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>
+          </>}
+          {type === 'curved' && <>
+            <mesh geometry={curvedArm} scale={[end, 1, 1]}><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>
+            <mesh position={[-end * 0.86, 5.72, 0]} rotation={[0, 0, end * 0.08]}><boxGeometry args={[0.72, 0.16, 0.34]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>
+          </>}
+          {type === 'straight' && <mesh position={[-end * 0.3, 5.8, 0]} rotation={[0, 0, end * 0.11]}><boxGeometry args={[0.78, 0.16, 0.36]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>}
         </group>
       )))}
     </group>
@@ -483,7 +506,7 @@ function App() {
                 </div>
               </>}
               {activeStep === 4 && <>
-                <div className="step-intro"><span>PASO 05 / 05</span><h2>¿Qué tipo de focos?</h2><p>Elige una iluminación integrada en la estructura.</p></div>
+                <div className="step-intro"><span>PASO 05 / 05</span><h2>¿Qué tipo de focos?</h2><p>Elige uno de los tres diseños del catálogo.</p></div>
                 {renderChoices(lightingTypes, configuration.lighting, (id) => updateConfiguration('lighting', id as CourtConfiguration['lighting']))}
               </>}
               {activeStep === 5 && <>
