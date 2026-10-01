@@ -225,9 +225,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
 .icon-button { width: 36px; height: 36px; border-radius: 50%; }
 .icon-button:hover { background: #fff; border-color: #65846c; transform: translateY(-1px); }
 .reference-toggle:hover { transform: none; }
-.lighting-switch { display: inline-flex; min-width: 139px; height: 36px; align-items: center; justify-content: space-between; gap: 6px; padding: 0 9px; border: 1px solid rgba(36,53,42,.18); border-radius: 20px; color: #526453; background: rgba(255,255,255,.8); cursor: pointer; transition: border-color .18s ease, background .18s ease; }
+.lighting-switch { display: inline-flex; min-width: 92px; height: 36px; align-items: center; justify-content: space-between; gap: 9px; padding: 0 10px; border: 1px solid rgba(36,53,42,.18); border-radius: 20px; color: #526453; background: rgba(255,255,255,.8); cursor: pointer; transition: border-color .18s ease, background .18s ease; }
 .lighting-switch:hover { border-color: #65846c; background: #fff; }
-.lighting-mode { display: inline-flex; align-items: center; gap: 3px; color: #899489; font-family: 'Manrope','Avenir Next',sans-serif; font-size: 8px; font-weight: 700; line-height: 1; }
+.lighting-mode { display: inline-flex; align-items: center; justify-content: center; color: #899489; line-height: 1; }
 .lighting-mode svg { flex: 0 0 auto; }
 .lighting-track { position: relative; display: block; width: 26px; height: 15px; flex: 0 0 26px; border-radius: 99px; background: #93aa96; transition: background .18s ease; }
 .lighting-thumb { position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(25,42,29,.28); transition: transform .18s ease; }
@@ -272,9 +272,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
   .brand { width: 128px; }
   .brand img { width: 126px; max-height: 39px; }
   .icon-button { width: 34px; height: 34px; }
-  .lighting-switch { min-width: 119px; height: 34px; gap: 5px; padding: 0 7px; }
-  .lighting-mode { gap: 2px; font-size: 7px; }
-  .lighting-mode svg { width: 12px; height: 12px; }
+  .lighting-switch { min-width: 86px; height: 34px; gap: 7px; padding: 0 8px; }
+  .lighting-mode svg { width: 13px; height: 13px; }
   .lighting-track { width: 24px; height: 14px; flex-basis: 24px; }
   .lighting-thumb { width: 10px; height: 10px; }
   .lighting-switch.is-night .lighting-thumb { transform: translateX(10px); }
@@ -296,7 +295,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
   .brand { width: 100px; }
   .brand img { width: 98px; }
   .topbar-actions { gap: 6px; }
-  .lighting-switch { min-width: 109px; }
+  .lighting-switch { min-width: 82px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; } }
 
