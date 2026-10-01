@@ -15,8 +15,9 @@ const courtTypes = [
 ] as const
 
 const grassTypes = [
-  { id: 'monofilament', label: 'Monofilamento', description: 'Fibra recta con nervio central · 12 mm · 10.000 Dtex' },
-  { id: 'supercourt', label: 'Supercourt oficial WPT', description: 'Fibra texturizada con nervaduras · 10 mm · 10.000 Dtex' },
+  { id: 'fibrillated', label: 'Césped fibrilado', description: 'Opción económica · requiere cepillado y mantenimiento regular.' },
+  { id: 'monofilament', label: 'Césped monofilamento', description: 'Más duradero · mantenimiento reducido · bote homogéneo.' },
+  { id: 'textured', label: 'Césped texturizado', description: 'Tacto suave y acabado mate · más indicado para zonas de ocio.' },
 ] as const
 
 const grassColors = [
@@ -77,11 +78,16 @@ function createTurfTexture(colorId: CourtConfiguration['grassColor'], grassType:
     const x = Math.random() * canvas.width
     const y = Math.random() * canvas.height
     context.strokeStyle = Math.random() > 0.5 ? turfColor.fiber : turfColor.dark
-    context.globalAlpha = 0.22 + Math.random() * 0.32
-    context.lineWidth = grassType === 'supercourt' ? 1.4 + Math.random() * 1.4 : 1 + Math.random() * 1.2
+    context.globalAlpha = grassType === 'textured' ? 0.18 + Math.random() * 0.2 : 0.22 + Math.random() * 0.32
+    context.lineWidth = grassType === 'fibrillated' ? 1.8 + Math.random() * 1.5 : grassType === 'textured' ? 1.5 + Math.random() * 1.8 : 1 + Math.random() * 1.2
     context.beginPath()
     context.moveTo(x, y)
-    context.lineTo(x + Math.random() * 3, y - 5 - Math.random() * (grassType === 'supercourt' ? 11 : 8))
+    if (grassType === 'textured') {
+      context.quadraticCurveTo(x + 4 + Math.random() * 5, y - 2, x + 1 + Math.random() * 4, y - 4 - Math.random() * 3)
+    } else {
+      const fiberLength = grassType === 'fibrillated' ? 3 + Math.random() * 5 : 5 + Math.random() * 8
+      context.lineTo(x + Math.random() * (grassType === 'fibrillated' ? 5 : 3), y - fiberLength)
+    }
     context.stroke()
   }
   context.globalAlpha = 1
@@ -198,7 +204,7 @@ function CourtScene({ night, court }: { night: boolean; court: CourtConfiguratio
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.083, 0]} receiveShadow>
         <planeGeometry args={[20, 10]} />
-        <meshStandardMaterial map={turf} roughness={court.grassType === 'supercourt' ? 0.72 : 0.92} />
+        <meshStandardMaterial map={turf} roughness={court.grassType === 'textured' ? 0.62 : court.grassType === 'monofilament' ? 0.82 : 0.95} />
       </mesh>
 
       <CourtLines />
@@ -463,7 +469,7 @@ function App() {
                 {renderCourtChoices()}
               </>}
               {activeStep === 1 && <>
-                <div className="step-intro"><span>PASO 02 / 05</span><h2>¿Qué césped prefieres?</h2><p>Dos acabados deportivos para un juego preciso.</p></div>
+                <div className="step-intro"><span>PASO 02 / 05</span><h2>¿Qué césped prefieres?</h2><p>Elige entre las tres fibras disponibles para pádel.</p></div>
                 {renderChoices(grassTypes, configuration.grassType, (id) => updateConfiguration('grassType', id as CourtConfiguration['grassType']))}
               </>}
               {activeStep === 2 && <>
