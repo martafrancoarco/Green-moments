@@ -205,7 +205,7 @@ function LogoSigns() {
     <group>
       {[-1, 1].map((end) => (
         <group key={`sign-${end}`} position={[end * 9.9, 2.45, 0]} rotation={[0, end === -1 ? Math.PI / 2 : -Math.PI / 2, 0]}>
-          <mesh position={[0, 0, -0.02]}><planeGeometry args={[3.1, 1.08]} /><meshBasicMaterial color="#f7f8ef" /></mesh>
+          <mesh position={[0, 0, -0.02]}><planeGeometry args={[3.1, 1.08]} /><meshBasicMaterial color="#f7f8ef" transparent opacity={0.3} depthWrite={false} /></mesh>
           <mesh position={[0, 0, 0.005]}><planeGeometry args={[2.88, 0.88]} /><meshBasicMaterial map={logo} transparent side={2} toneMapped={false} /></mesh>
         </group>
       ))}
