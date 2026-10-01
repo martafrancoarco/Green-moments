@@ -223,6 +223,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
 .icon-button, .light-toggle, .help-button { display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(36,53,42,.15); color: #344a39; background: rgba(255,255,255,.72); cursor: pointer; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
 .icon-button { width: 36px; height: 36px; border-radius: 50%; }
 .icon-button:hover, .help-button:hover { background: #fff; border-color: #65846c; transform: translateY(-1px); }
+.reference-toggle:hover { transform: none; }
 .light-toggle { gap: 8px; min-width: 85px; height: 36px; padding: 0 12px; border-radius: 2px; }
 .light-toggle:hover { background: #fff; border-color: #65846c; }
 .project-caption { position: absolute; left: 50px; bottom: 49px; width: min(390px,calc(100vw - 390px)); color: var(--ink); z-index: 1; pointer-events: none; animation: arrive .75s .12s both cubic-bezier(.2,.75,.25,1); }

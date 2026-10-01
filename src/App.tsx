@@ -2,7 +2,7 @@ import { Suspense, useMemo, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { ContactShadows, OrbitControls, useTexture } from '@react-three/drei'
 import { BufferGeometry, CanvasTexture, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace, type Texture } from 'three'
-import { Camera, CircleHelp, Moon, Move3D, RotateCcw, Sun } from 'lucide-react'
+import { Camera, CircleHelp, Moon, Move3D, RotateCcw, Sun, X } from 'lucide-react'
 import './App.css'
 
 function createTurfTexture() {
@@ -181,6 +181,7 @@ function Floodlights({ night }: { night: boolean }) {
 function App() {
   const [night, setNight] = useState(false)
   const [resetKey, setResetKey] = useState(0)
+  const [showReference, setShowReference] = useState(false)
 
   return (
     <main className="experience">
@@ -195,6 +196,7 @@ function App() {
         <div className="topbar-meta"><span className="live-dot" /> VISUALIZACIÓN 3D <span className="meta-divider">/</span> PROYECTO 01</div>
         <div className="topbar-actions">
           <button className="icon-button" type="button" onClick={() => setResetKey((value) => value + 1)} title="Restablecer cámara" aria-label="Restablecer cámara"><RotateCcw size={17} strokeWidth={1.7} /></button>
+          <button className="icon-button reference-toggle" type="button" onClick={() => setShowReference((value) => !value)} title="Referencia del proyecto" aria-label={showReference ? 'Cerrar referencia del proyecto' : 'Abrir referencia del proyecto'} aria-expanded={showReference} aria-controls="reference-panel"><Camera size={17} strokeWidth={1.7} /></button>
           <button className="light-toggle" type="button" onClick={() => setNight((value) => !value)} aria-label={night ? 'Cambiar a luz de día' : 'Cambiar a luz nocturna'}>{night ? <Moon size={16} /> : <Sun size={16} />}<span>{night ? 'NOCHE' : 'DÍA'}</span></button>
         </div>
       </header>
@@ -209,8 +211,8 @@ function App() {
         </div>
       </section>
 
-      <aside className="reference-panel">
-        <div className="reference-heading"><span>REFERENCIA DE PROYECTO</span><Camera size={15} strokeWidth={1.6} /></div>
+      <aside id="reference-panel" className="reference-panel" hidden={!showReference}>
+        <div className="reference-heading"><span>REFERENCIA DE PROYECTO</span><button className="icon-button reference-close" type="button" onClick={() => setShowReference(false)} title="Cerrar referencia" aria-label="Cerrar referencia del proyecto"><X size={15} strokeWidth={1.8} /></button></div>
         <img className="reference-image" src={`${import.meta.env.BASE_URL}padel-project.jpg`} alt="Pista de pádel de Green Moments" />
         <div className="reference-foot"><span>CONSTRUCCIÓN DE PISTAS DE PÁDEL</span><span>01 / 01</span></div>
       </aside>
