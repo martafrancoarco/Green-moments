@@ -2,7 +2,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { ContactShadows, OrbitControls, Sky, useTexture } from '@react-three/drei'
 import { BufferGeometry, CanvasTexture, CatmullRomCurve3, DoubleSide, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace, TubeGeometry, Vector3 } from 'three'
-import { ArrowLeft, ArrowRight, Camera, Check, Mail, Moon, Move3D, Pencil, RotateCcw, SlidersHorizontal, Sun, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Mail, Moon, Move3D, Pencil, RotateCcw, SlidersHorizontal, Sun, X } from 'lucide-react'
 import './App.css'
 
 const courtTypes = [
@@ -372,7 +372,6 @@ function Floodlights({ night, type, frameColor }: { night: boolean; type: CourtC
 function App() {
   const [night, setNight] = useState(false)
   const [resetKey, setResetKey] = useState(0)
-  const [showReference, setShowReference] = useState(false)
   const [activeStep, setActiveStep] = useState<number | null>(0)
   const [configuration, setConfiguration] = useState<CourtConfiguration>(defaultCourtConfiguration)
 
@@ -404,7 +403,6 @@ function App() {
     setResetKey((value) => value + 1)
     setConfiguration(defaultCourtConfiguration)
     setNight(false)
-    setShowReference(false)
     setActiveStep(0)
   }
 
@@ -451,7 +449,6 @@ function App() {
         <div className="topbar-meta"><span className="live-dot" /> CONFIGURADOR 3D <span className="meta-divider">/</span> PISTA DE PÁDEL</div>
         <div className="topbar-actions">
           <button className="icon-button" type="button" onClick={resetConfigurator} title="Restablecer cámara y configuración" aria-label="Restablecer cámara y configuración"><RotateCcw size={17} strokeWidth={1.7} /></button>
-          <button className="icon-button reference-toggle" type="button" onClick={() => setShowReference((value) => !value)} title="Referencia del proyecto" aria-label={showReference ? 'Cerrar referencia del proyecto' : 'Abrir referencia del proyecto'} aria-expanded={showReference} aria-controls="reference-panel"><Camera size={17} strokeWidth={1.7} /></button>
           <button className={`lighting-switch${night ? ' is-night' : ''}`} type="button" role="switch" aria-checked={night} aria-label="Modo nocturno" title={night ? 'Cambiar a luz de día' : 'Cambiar a luz nocturna'} onClick={() => setNight((value) => !value)}>
             <span className="lighting-mode day-mode"><Sun size={14} /></span>
             <span className="lighting-track"><span className="lighting-thumb" /></span>
@@ -535,12 +532,6 @@ function App() {
           </>
         )}
         {activeStep === null && <button className="configurator-reopen" type="button" onClick={() => setActiveStep(0)}><SlidersHorizontal size={16} /> Configurar pista</button>}
-      </aside>
-
-      <aside id="reference-panel" className="reference-panel" hidden={!showReference}>
-        <div className="reference-heading"><span>REFERENCIA DE PROYECTO</span><button className="icon-button reference-close" type="button" onClick={() => setShowReference(false)} title="Cerrar referencia" aria-label="Cerrar referencia del proyecto"><X size={15} strokeWidth={1.8} /></button></div>
-        <img className="reference-image" src={`${import.meta.env.BASE_URL}padel-project.jpg`} alt="Pista de pádel de Green Moments" />
-        <div className="reference-foot"><span>CONSTRUCCIÓN DE PISTAS DE PÁDEL</span><span>01 / 01</span></div>
       </aside>
 
       <div className="interaction-hint"><Move3D size={15} strokeWidth={1.7} /><span>ARRASTRA PARA EXPLORAR</span><span className="hint-dot">·</span><span>RUEDA PARA ZOOM</span></div>
