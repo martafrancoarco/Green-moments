@@ -26,8 +26,6 @@ const grassColors = [
   { id: 'terracotta', label: 'Terracota', color: '#ad5540', dark: '#813e31', fiber: '#d77a59' },
   { id: 'black', label: 'Negro', color: '#343b38', dark: '#242a27', fiber: '#56605a' },
   { id: 'gray', label: 'Gris', color: '#838e89', dark: '#626d68', fiber: '#a8b1ac' },
-  { id: 'sand', label: 'Arena', color: '#b59e72', dark: '#8a7651', fiber: '#d0ba8c' },
-  { id: 'burgundy', label: 'Burdeos', color: '#81364b', dark: '#60273a', fiber: '#a95868' },
 ] as const
 
 const frameColors = [
