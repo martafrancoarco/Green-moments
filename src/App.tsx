@@ -49,6 +49,14 @@ type CourtConfiguration = {
   lighting: (typeof lightingTypes)[number]['id']
 }
 
+const defaultCourtConfiguration: CourtConfiguration = {
+  courtType: 'club',
+  grassType: 'monofilament',
+  grassColor: 'green',
+  frameColor: 'black',
+  lighting: 'straight',
+}
+
 const configurationSteps = ['Tipo de pista', 'Césped', 'Color', 'Estructura', 'Iluminación']
 
 function createTurfTexture(colorId: CourtConfiguration['grassColor'], grassType: CourtConfiguration['grassType']) {
@@ -83,7 +91,7 @@ function createTurfTexture(colorId: CourtConfiguration['grassColor'], grassType:
   return texture
 }
 
-function CourtScene({ night, resetKey, court }: { night: boolean; resetKey: number; court: CourtConfiguration }) {
+function CourtScene({ night, court }: { night: boolean; court: CourtConfiguration }) {
   const turf = useMemo(() => createTurfTexture(court.grassColor, court.grassType), [court.grassColor, court.grassType])
   const frameColor = frameColors.find((option) => option.id === court.frameColor)?.color ?? '#242a27'
 
@@ -154,7 +162,7 @@ function CourtScene({ night, resetKey, court }: { night: boolean; resetKey: numb
       <Floodlights night={night} type={court.lighting} frameColor={frameColor} />
       <mesh position={[0, 0.2, 0]}><sphereGeometry args={[0.12, 20, 20]} /><meshStandardMaterial color="#f2e955" roughness={0.35} /></mesh>
       <ContactShadows position={[0, -0.055, 0]} opacity={night ? 0.45 : 0.25} scale={28} blur={2.8} far={8} />
-      <OrbitControls key={resetKey} makeDefault target={[0, 1.2, 0]} minDistance={13} maxDistance={32} minPolarAngle={0.35} maxPolarAngle={1.42} enablePan={false} dampingFactor={0.08} />
+      <OrbitControls makeDefault target={[0, 1.2, 0]} minDistance={13} maxDistance={32} minPolarAngle={0.35} maxPolarAngle={1.42} enablePan={false} dampingFactor={0.08} />
     </>
   )
 }
@@ -246,13 +254,7 @@ function App() {
   const [resetKey, setResetKey] = useState(0)
   const [showReference, setShowReference] = useState(false)
   const [activeStep, setActiveStep] = useState<number | null>(0)
-  const [configuration, setConfiguration] = useState<CourtConfiguration>({
-    courtType: 'club',
-    grassType: 'monofilament',
-    grassColor: 'green',
-    frameColor: 'black',
-    lighting: 'straight',
-  })
+  const [configuration, setConfiguration] = useState<CourtConfiguration>(defaultCourtConfiguration)
 
   useEffect(() => {
     const timeout = window.setTimeout(() => window.dispatchEvent(new Event('resize')), 0)
@@ -278,6 +280,14 @@ function App() {
     setConfiguration((current) => ({ ...current, [key]: value }))
   }
 
+  function resetConfigurator() {
+    setResetKey((value) => value + 1)
+    setConfiguration(defaultCourtConfiguration)
+    setNight(false)
+    setShowReference(false)
+    setActiveStep(0)
+  }
+
   function renderChoices<T extends { id: string; label: string; description: string }>(
     options: readonly T[],
     selectedId: string,
@@ -297,9 +307,9 @@ function App() {
 
   return (
     <main className={`experience${activeStep === null ? ' is-configurator-collapsed' : ''}`}>
-      <Canvas className="court-canvas" shadows="percentage" dpr={[1, 1.8]} camera={{ position: [17.5, 14.5, 18.5], fov: 38, near: 0.1, far: 100 }} gl={{ antialias: true, powerPreference: 'high-performance' }}>
+      <Canvas key={resetKey} className="court-canvas" shadows="percentage" dpr={[1, 1.8]} camera={{ position: [17.5, 14.5, 18.5], fov: 38, near: 0.1, far: 100 }} gl={{ antialias: true, powerPreference: 'high-performance' }}>
         <Suspense fallback={null}>
-          <CourtScene night={night} resetKey={resetKey} court={configuration} />
+          <CourtScene night={night} court={configuration} />
         </Suspense>
       </Canvas>
 
@@ -307,7 +317,7 @@ function App() {
         <a className="brand" href="https://greenmoments.es/" target="_blank" rel="noreferrer" aria-label="Green Moments, página web"><img src={`${import.meta.env.BASE_URL}green-moments-logo.png`} alt="Green Moments" /></a>
         <div className="topbar-meta"><span className="live-dot" /> CONFIGURADOR 3D <span className="meta-divider">/</span> PISTA DE PÁDEL</div>
         <div className="topbar-actions">
-          <button className="icon-button" type="button" onClick={() => setResetKey((value) => value + 1)} title="Restablecer cámara" aria-label="Restablecer cámara"><RotateCcw size={17} strokeWidth={1.7} /></button>
+          <button className="icon-button" type="button" onClick={resetConfigurator} title="Restablecer cámara y configuración" aria-label="Restablecer cámara y configuración"><RotateCcw size={17} strokeWidth={1.7} /></button>
           <button className="icon-button reference-toggle" type="button" onClick={() => setShowReference((value) => !value)} title="Referencia del proyecto" aria-label={showReference ? 'Cerrar referencia del proyecto' : 'Abrir referencia del proyecto'} aria-expanded={showReference} aria-controls="reference-panel"><Camera size={17} strokeWidth={1.7} /></button>
           <button className="light-toggle" type="button" onClick={() => setNight((value) => !value)} aria-label={night ? 'Cambiar a luz de día' : 'Cambiar a luz nocturna'}>{night ? <Moon size={16} /> : <Sun size={16} />}<span>{night ? 'NOCHE' : 'DÍA'}</span></button>
         </div>
