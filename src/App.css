@@ -212,6 +212,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
   background: #cfd9d1;
 }
 .court-canvas { position: absolute !important; inset: 0; z-index: -1; touch-action: none; }
+.court-canvas canvas { width: 100% !important; height: 100% !important; }
 .topbar { position: absolute; inset: 0 0 auto; height: 76px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; background: rgba(249,250,245,.91); border-bottom: 1px solid rgba(38,61,44,.13); backdrop-filter: blur(18px); z-index: 2; }
 .brand { display: flex; align-items: center; width: 194px; height: 54px; }
 .brand img { display: block; width: 178px; max-height: 48px; object-fit: contain; object-position: left center; }

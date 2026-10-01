@@ -1,7 +1,7 @@
-import { Suspense, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { ContactShadows, OrbitControls, useTexture } from '@react-three/drei'
-import { BufferGeometry, CanvasTexture, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace, type Texture } from 'three'
+import { BufferGeometry, CanvasTexture, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace } from 'three'
 import { ArrowLeft, ArrowRight, Camera, Check, CircleHelp, Mail, Moon, Move3D, Pencil, RotateCcw, SlidersHorizontal, Sun, X } from 'lucide-react'
 import './App.css'
 
@@ -85,7 +85,6 @@ function createTurfTexture(colorId: CourtConfiguration['grassColor'], grassType:
 
 function CourtScene({ night, resetKey, court }: { night: boolean; resetKey: number; court: CourtConfiguration }) {
   const turf = useMemo(() => createTurfTexture(court.grassColor, court.grassType), [court.grassColor, court.grassType])
-  const logo = useTexture(`${import.meta.env.BASE_URL}green-moments-logo.png`)
   const frameColor = frameColors.find((option) => option.id === court.frameColor)?.color ?? '#242a27'
 
   const fenceGeometry = useMemo(() => {
@@ -151,7 +150,7 @@ function CourtScene({ night, resetKey, court }: { night: boolean; resetKey: numb
       ))}
       <lineSegments geometry={fenceGeometry}><lineBasicMaterial color="#34433b" transparent opacity={0.74} /></lineSegments>
       <FenceSupports courtType={court.courtType} frameColor={frameColor} />
-      <LogoSigns logo={logo} />
+      <Suspense fallback={null}><LogoSigns /></Suspense>
       <Floodlights night={night} type={court.lighting} frameColor={frameColor} />
       <mesh position={[0, 0.2, 0]}><sphereGeometry args={[0.12, 20, 20]} /><meshStandardMaterial color="#f2e955" roughness={0.35} /></mesh>
       <ContactShadows position={[0, -0.055, 0]} opacity={night ? 0.45 : 0.25} scale={28} blur={2.8} far={8} />
@@ -200,7 +199,8 @@ function FenceSupports({ courtType, frameColor }: { courtType: CourtConfiguratio
   )
 }
 
-function LogoSigns({ logo }: { logo: Texture }) {
+function LogoSigns() {
+  const logo = useTexture(`${import.meta.env.BASE_URL}green-moments-logo.png`)
   return (
     <group>
       {[-1, 1].map((end) => (
@@ -250,6 +250,11 @@ function App() {
     lighting: 'straight',
   })
 
+  useEffect(() => {
+    const timeout = window.setTimeout(() => window.dispatchEvent(new Event('resize')), 0)
+    return () => window.clearTimeout(timeout)
+  }, [])
+
   const selectedCourt = courtTypes.find((option) => option.id === configuration.courtType)!
   const selectedGrass = grassTypes.find((option) => option.id === configuration.grassType)!
   const selectedGrassColor = grassColors.find((option) => option.id === configuration.grassColor)!
@@ -263,7 +268,7 @@ function App() {
     `Estructura: ${selectedFrame.label} (${selectedFrame.ral})`,
     `Iluminación: ${selectedLighting.label}`,
   ].join('\n')
-  const quoteHref = `mailto:comercial@greenmoments.es?subject=${encodeURIComponent('Configuración de pista de pádel')}&body=${encodeURIComponent(quoteBody)}`
+  const quoteHref = `mailto:victor@greenmoments.es?subject=${encodeURIComponent('Configuración de pista de pádel')}&body=${encodeURIComponent(quoteBody)}`
 
   function updateConfiguration<K extends keyof CourtConfiguration>(key: K, value: CourtConfiguration[K]) {
     setConfiguration((current) => ({ ...current, [key]: value }))
@@ -365,7 +370,7 @@ function App() {
                   ].map(([label, value, editStep]) => <div className="summary-row" key={label}><dt>{label}</dt><dd>{value}</dd><button className="summary-edit" type="button" aria-label={`Editar ${label}`} onClick={() => setActiveStep(Number(editStep))}><Pencil size={13} /></button></div>)}
                 </dl>
                 <a className="quote-link" href={quoteHref}><Mail size={16} /> Solicitar presupuesto <ArrowRight size={15} /></a>
-                <p className="quote-note">Se abrirá un correo con las opciones de tu pista.</p>
+                <p className="quote-note">Se abrirá un correo a victor@greenmoments.es con las opciones de tu pista.</p>
               </>}
             </div>
 
