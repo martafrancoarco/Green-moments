@@ -209,7 +209,7 @@ function LogoSigns() {
           <mesh position={[0, 0, 0.005]}><planeGeometry args={[2.62, 1.2]} /><meshBasicMaterial map={logo} transparent depthWrite={false} side={DoubleSide} toneMapped={false} /></mesh>
         </group>
       ))}
-      <group position={[-4.25, 0.95, 5.06]}>
+      <group position={[-5.8, 0.95, 5.06]}>
         <mesh position={[0, 0, -0.02]}><planeGeometry args={[2.82, 1.4]} /><meshBasicMaterial color="#f7f8ef" transparent opacity={0.36} depthWrite={false} side={DoubleSide} /></mesh>
         <mesh position={[0, 0, 0.005]}><planeGeometry args={[2.62, 1.2]} /><meshBasicMaterial map={logo} transparent depthWrite={false} side={DoubleSide} toneMapped={false} /></mesh>
       </group>
