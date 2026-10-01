@@ -6,8 +6,12 @@ import { ArrowLeft, ArrowRight, Camera, Check, Mail, Moon, Move3D, Pencil, Rotat
 import './App.css'
 
 const courtTypes = [
-  { id: 'club', label: 'Pista club', description: 'Fondos de vidrio con postes intermedios' },
-  { id: 'panoramic', label: 'Pista panorámica', description: 'Fondos continuos sin postes intermedios' },
+  { id: 'modular', label: 'Pista modular', description: 'Montaje versátil con estructura modular.', image: 'court-model-modular.jpg' },
+  { id: 'pillars', label: 'Pista de pilares', description: 'Estructura reforzada con pilares intermedios.', image: 'court-model-pillars.jpg' },
+  { id: 'panoramic', label: 'Pista panorámica', description: 'Fondos acristalados continuos para una visión amplia.', image: 'court-model-panoramic.jpg' },
+  { id: 'individual', label: 'Pista individual', description: 'Formato compacto para partidos uno contra uno.', image: 'court-model-individual.jpg' },
+  { id: 'indoor', label: 'Pista indoor', description: 'Configuración bajo cubierta.', image: 'court-model-indoor.jpg' },
+  { id: 'outdoor', label: 'Pista outdoor', description: 'Configuración para instalaciones al aire libre.', image: 'court-model-outdoor.jpg' },
 ] as const
 
 const grassTypes = [
@@ -50,7 +54,7 @@ type CourtConfiguration = {
 }
 
 const defaultCourtConfiguration: CourtConfiguration = {
-  courtType: 'club',
+  courtType: 'modular',
   grassType: 'monofilament',
   grassColor: 'green',
   frameColor: 'black',
@@ -149,6 +153,7 @@ function createLandscapeTexture() {
 function CourtScene({ night, court }: { night: boolean; court: CourtConfiguration }) {
   const turf = useMemo(() => createTurfTexture(court.grassColor, court.grassType), [court.grassColor, court.grassType])
   const frameColor = frameColors.find((option) => option.id === court.frameColor)?.color ?? '#242a27'
+  const courtWidthScale = court.courtType === 'individual' ? 0.62 : 1
 
   const fenceGeometry = useMemo(() => {
     const points: number[] = []
@@ -171,7 +176,7 @@ function CourtScene({ night, court }: { night: boolean; court: CourtConfiguratio
   }, [])
 
   const floodlightPositions: [number, number, number][] = [
-    [-11, 6, -6], [-11, 6, 6], [11, 6, -6], [11, 6, 6],
+    [-11, 6, -6 * courtWidthScale], [-11, 6, 6 * courtWidthScale], [11, 6, -6 * courtWidthScale], [11, 6, 6 * courtWidthScale],
   ]
 
   return (
@@ -186,6 +191,7 @@ function CourtScene({ night, court }: { night: boolean; court: CourtConfiguratio
       ))}
 
       <OutdoorEnvironment night={night} />
+      <group scale={[1, 1, courtWidthScale]}>
       <mesh position={[0, 0, 0]} receiveShadow castShadow>
         <boxGeometry args={[20.35, 0.16, 10.35]} />
         <meshStandardMaterial color="#1e3228" roughness={0.7} />
@@ -214,6 +220,8 @@ function CourtScene({ night, court }: { night: boolean; court: CourtConfiguratio
       <Suspense fallback={null}><LogoSigns /></Suspense>
       <Floodlights night={night} type={court.lighting} frameColor={frameColor} />
       <mesh position={[0, 0.2, 0]}><sphereGeometry args={[0.12, 20, 20]} /><meshStandardMaterial color="#f2e955" roughness={0.35} /></mesh>
+      {court.courtType === 'indoor' && <IndoorRoof frameColor={frameColor} />}
+      </group>
       <ContactShadows position={[0, -0.055, 0]} opacity={night ? 0.45 : 0.25} scale={28} blur={2.8} far={8} />
       <OrbitControls makeDefault target={[0, 1.2, 0]} minDistance={13} maxDistance={32} minPolarAngle={0.35} maxPolarAngle={1.42} enablePan={false} dampingFactor={0.08} />
     </>
@@ -263,17 +271,31 @@ function Net() {
 }
 
 function FenceSupports({ courtType, frameColor }: { courtType: CourtConfiguration['courtType']; frameColor: string }) {
+  const sidePostPositions = courtType === 'pillars' ? [-10, -7.5, -5, 0, 5, 7.5, 10] : [-10, -7.5, 0, 7.5, 10]
+  const endPostPositions = courtType === 'panoramic' ? [-5, 5] : [-5, 0, 5]
   return (
     <group>
-      {[-10, -7.5, 0, 7.5, 10].flatMap((x) => [-1, 1].map((side) => (
+      {sidePostPositions.flatMap((x) => [-1, 1].map((side) => (
         <mesh key={`side-pole-${x}-${side}`} position={[x, 2.14, side * 5.03]}><boxGeometry args={[0.085, 4.28, 0.085]} /><meshStandardMaterial color={frameColor} metalness={0.72} roughness={0.32} /></mesh>
       )))}
-      {[-10, 10].flatMap((x) => (courtType === 'club' ? [-5, 0, 5] : [-5, 5]).map((z) => (
+      {[-10, 10].flatMap((x) => endPostPositions.map((z) => (
         <mesh key={`end-pole-${x}-${z}`} position={[x, 2.14, z]}><boxGeometry args={[0.085, 4.28, 0.085]} /><meshStandardMaterial color={frameColor} metalness={0.72} roughness={0.32} /></mesh>
       )))}
       <mesh position={[0, 4.25, -5.03]}><boxGeometry args={[20.1, 0.09, 0.09]} /><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>
       <mesh position={[0, 4.25, 5.03]}><boxGeometry args={[20.1, 0.09, 0.09]} /><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>
       {[-10.03, 10.03].map((x) => <mesh key={`end-rail-${x}`} position={[x, 4.25, 0]}><boxGeometry args={[0.09, 0.09, 10.1]} /><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>)}
+    </group>
+  )
+}
+
+function IndoorRoof({ frameColor }: { frameColor: string }) {
+  return (
+    <group>
+      <mesh position={[0, 8.3, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[21, 10.8]} />
+        <meshPhysicalMaterial color="#d7dfd8" transparent opacity={0.22} roughness={0.5} metalness={0.08} depthWrite={false} side={DoubleSide} />
+      </mesh>
+      {[-9, -4.5, 0, 4.5, 9].map((x) => <mesh key={`roof-rafter-${x}`} position={[x, 8.18, 0]}><boxGeometry args={[0.12, 0.12, 10.6]} /><meshStandardMaterial color={frameColor} metalness={0.42} roughness={0.48} /></mesh>)}
     </group>
   )
 }
@@ -376,6 +398,19 @@ function App() {
     )
   }
 
+  function renderCourtChoices() {
+    return (
+      <div className="court-choice-grid">
+        {courtTypes.map((option) => (
+          <button key={option.id} className={`court-model-card${configuration.courtType === option.id ? ' is-selected' : ''}`} type="button" aria-pressed={configuration.courtType === option.id} onClick={() => updateConfiguration('courtType', option.id)}>
+            <span className="court-model-image"><img src={`${import.meta.env.BASE_URL}${option.image}`} alt="" loading="lazy" /><span className="court-model-mark"><Check size={13} strokeWidth={2.5} /></span></span>
+            <span className="court-model-copy"><strong>{option.label}</strong><small>{option.description}</small></span>
+          </button>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <main className={`experience${activeStep === null ? ' is-configurator-collapsed' : ''}`}>
       <Canvas key={resetKey} className="court-canvas" shadows="percentage" dpr={[1, 1.8]} camera={{ position: [17.5, 14.5, 18.5], fov: 38, near: 0.1, far: 100 }} gl={{ antialias: true, powerPreference: 'high-performance' }}>
@@ -425,7 +460,7 @@ function App() {
             <div className="configurator-content" key={activeStep}>
               {activeStep === 0 && <>
                 <div className="step-intro"><span>PASO 01 / 05</span><h2>¿Qué tipo de pista quieres?</h2><p>Elige la estructura que mejor se adapta a tu espacio.</p></div>
-                {renderChoices(courtTypes, configuration.courtType, (id) => updateConfiguration('courtType', id as CourtConfiguration['courtType']))}
+                {renderCourtChoices()}
               </>}
               {activeStep === 1 && <>
                 <div className="step-intro"><span>PASO 02 / 05</span><h2>¿Qué césped prefieres?</h2><p>Dos acabados deportivos para un juego preciso.</p></div>

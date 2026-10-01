@@ -18,7 +18,7 @@ Abre la URL local que muestra Vite, normalmente `http://localhost:5173/`.
 - Arrastra la escena para orbitar la cámara y usa la rueda para acercar o alejar.
 - Usa el botón de sol/luna para alternar la iluminación diurna y nocturna.
 - Usa el botón de restablecer para recuperar el encuadre y la configuración iniciales.
-- Elige entre pista club o panorámica, dos tipos de césped, siete colores, siete acabados RAL y tres opciones de iluminación.
+- Elige entre seis modelos con fotos oficiales: modular, pilares, panorámica, individual, indoor y outdoor. También puedes configurar dos tipos de césped, siete colores, siete acabados RAL y tres opciones de iluminación.
 - Revisa y edita las selecciones en el resumen; «Solicitar presupuesto» prepara un correo a `victor@greenmoments.es` con la configuración.
 
 ## Verificación
