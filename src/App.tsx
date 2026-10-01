@@ -2,27 +2,74 @@ import { Suspense, useMemo, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { ContactShadows, OrbitControls, useTexture } from '@react-three/drei'
 import { BufferGeometry, CanvasTexture, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace, type Texture } from 'three'
-import { Camera, CircleHelp, Moon, Move3D, RotateCcw, Sun, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Camera, Check, CircleHelp, Mail, Moon, Move3D, Pencil, RotateCcw, SlidersHorizontal, Sun, X } from 'lucide-react'
 import './App.css'
 
-function createTurfTexture() {
+const courtTypes = [
+  { id: 'club', label: 'Pista club', description: 'Fondos de vidrio con postes intermedios' },
+  { id: 'panoramic', label: 'Pista panorámica', description: 'Fondos continuos sin postes intermedios' },
+] as const
+
+const grassTypes = [
+  { id: 'monofilament', label: 'Monofilamento', description: 'Fibra recta con nervio central · 12 mm · 10.000 Dtex' },
+  { id: 'supercourt', label: 'Supercourt oficial WPT', description: 'Fibra texturizada con nervaduras · 10 mm · 10.000 Dtex' },
+] as const
+
+const grassColors = [
+  { id: 'blue', label: 'Azul', color: '#187baa', dark: '#105779', fiber: '#48a2c8' },
+  { id: 'green', label: 'Verde', color: '#137742', dark: '#075f37', fiber: '#45a15b' },
+  { id: 'terracotta', label: 'Terracota', color: '#ad5540', dark: '#813e31', fiber: '#d77a59' },
+  { id: 'black', label: 'Negro', color: '#343b38', dark: '#242a27', fiber: '#56605a' },
+  { id: 'gray', label: 'Gris', color: '#838e89', dark: '#626d68', fiber: '#a8b1ac' },
+  { id: 'sand', label: 'Arena', color: '#b59e72', dark: '#8a7651', fiber: '#d0ba8c' },
+  { id: 'burgundy', label: 'Burdeos', color: '#81364b', dark: '#60273a', fiber: '#a95868' },
+] as const
+
+const frameColors = [
+  { id: 'black', label: 'Negro', ral: 'RAL 9005', color: '#242a27' },
+  { id: 'anthracite', label: 'Antracita', ral: 'RAL 7016', color: '#41494a' },
+  { id: 'aluminum', label: 'Gris aluminio', ral: 'RAL 9006', color: '#929a99' },
+  { id: 'white', label: 'Blanco', ral: 'RAL 9010', color: '#e9e9df' },
+  { id: 'blue', label: 'Azul genciana', ral: 'RAL 5010', color: '#164d80' },
+  { id: 'moss', label: 'Verde musgo', ral: 'RAL 6005', color: '#28543d' },
+  { id: 'red', label: 'Rojo tráfico', ral: 'RAL 3020', color: '#bf312d' },
+] as const
+
+const lightingTypes = [
+  { id: 'straight', label: 'Foco recto', description: 'Brazo vertical sobre el lateral' },
+  { id: 'v', label: 'Foco en V', description: 'Brazos inclinados hacia la pista' },
+  { id: 'none', label: 'Sin focos', description: 'Solo estructura' },
+] as const
+
+type CourtConfiguration = {
+  courtType: (typeof courtTypes)[number]['id']
+  grassType: (typeof grassTypes)[number]['id']
+  grassColor: (typeof grassColors)[number]['id']
+  frameColor: (typeof frameColors)[number]['id']
+  lighting: (typeof lightingTypes)[number]['id']
+}
+
+const configurationSteps = ['Tipo de pista', 'Césped', 'Color', 'Estructura', 'Iluminación']
+
+function createTurfTexture(colorId: CourtConfiguration['grassColor'], grassType: CourtConfiguration['grassType']) {
+  const turfColor = grassColors.find((option) => option.id === colorId) ?? grassColors[1]
   const canvas = document.createElement('canvas')
   canvas.width = 512
   canvas.height = 512
   const context = canvas.getContext('2d')
   if (!context) return new CanvasTexture(canvas)
 
-  context.fillStyle = '#137742'
+  context.fillStyle = turfColor.color
   context.fillRect(0, 0, canvas.width, canvas.height)
   for (let index = 0; index < 9500; index += 1) {
     const x = Math.random() * canvas.width
     const y = Math.random() * canvas.height
-    context.strokeStyle = Math.random() > 0.5 ? '#45a15b' : '#075f37'
+    context.strokeStyle = Math.random() > 0.5 ? turfColor.fiber : turfColor.dark
     context.globalAlpha = 0.22 + Math.random() * 0.32
-    context.lineWidth = 1 + Math.random() * 1.2
+    context.lineWidth = grassType === 'supercourt' ? 1.4 + Math.random() * 1.4 : 1 + Math.random() * 1.2
     context.beginPath()
     context.moveTo(x, y)
-    context.lineTo(x + Math.random() * 3, y - 5 - Math.random() * 8)
+    context.lineTo(x + Math.random() * 3, y - 5 - Math.random() * (grassType === 'supercourt' ? 11 : 8))
     context.stroke()
   }
   context.globalAlpha = 1
@@ -36,9 +83,10 @@ function createTurfTexture() {
   return texture
 }
 
-function CourtScene({ night, resetKey }: { night: boolean; resetKey: number }) {
-  const turf = useMemo(() => createTurfTexture(), [])
+function CourtScene({ night, resetKey, court }: { night: boolean; resetKey: number; court: CourtConfiguration }) {
+  const turf = useMemo(() => createTurfTexture(court.grassColor, court.grassType), [court.grassColor, court.grassType])
   const logo = useTexture(`${import.meta.env.BASE_URL}green-moments-logo.png`)
+  const frameColor = frameColors.find((option) => option.id === court.frameColor)?.color ?? '#242a27'
 
   const fenceGeometry = useMemo(() => {
     const points: number[] = []
@@ -70,7 +118,7 @@ function CourtScene({ night, resetKey }: { night: boolean; resetKey: number }) {
       <fog attach="fog" args={[night ? '#18221d' : '#cfd9d1', 27, 58]} />
       <hemisphereLight args={['#e9f7ee', '#38443a', night ? 0.62 : 2.1]} />
       <directionalLight position={[-7, 15, 8]} intensity={night ? 0.22 : 3.2} castShadow shadow-mapSize={[2048, 2048]} />
-      {floodlightPositions.map(([x, y, z]) => (
+      {court.lighting !== 'none' && floodlightPositions.map(([x, y, z]) => (
         <pointLight key={`${x}-${z}`} position={[x, y, z]} intensity={night ? 18 : 0.3} distance={night ? 24 : 6} color="#f1f8d6" decay={2} />
       ))}
 
@@ -84,7 +132,7 @@ function CourtScene({ night, resetKey }: { night: boolean; resetKey: number }) {
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.083, 0]} receiveShadow>
         <planeGeometry args={[20, 10]} />
-        <meshStandardMaterial map={turf} roughness={0.92} />
+        <meshStandardMaterial map={turf} roughness={court.grassType === 'supercourt' ? 0.72 : 0.92} />
       </mesh>
 
       <CourtLines />
@@ -102,9 +150,9 @@ function CourtScene({ night, resetKey }: { night: boolean; resetKey: number }) {
         </mesh>
       ))}
       <lineSegments geometry={fenceGeometry}><lineBasicMaterial color="#34433b" transparent opacity={0.74} /></lineSegments>
-      <FenceSupports />
+      <FenceSupports courtType={court.courtType} frameColor={frameColor} />
       <LogoSigns logo={logo} />
-      <Floodlights night={night} />
+      <Floodlights night={night} type={court.lighting} frameColor={frameColor} />
       <mesh position={[0, 0.2, 0]}><sphereGeometry args={[0.12, 20, 20]} /><meshStandardMaterial color="#f2e955" roughness={0.35} /></mesh>
       <ContactShadows position={[0, -0.055, 0]} opacity={night ? 0.45 : 0.25} scale={28} blur={2.8} far={8} />
       <OrbitControls key={resetKey} makeDefault target={[0, 1.2, 0]} minDistance={13} maxDistance={32} minPolarAngle={0.35} maxPolarAngle={1.42} enablePan={false} dampingFactor={0.08} />
@@ -136,18 +184,18 @@ function Net() {
   )
 }
 
-function FenceSupports() {
+function FenceSupports({ courtType, frameColor }: { courtType: CourtConfiguration['courtType']; frameColor: string }) {
   return (
     <group>
       {[-10, -7.5, 0, 7.5, 10].flatMap((x) => [-1, 1].map((side) => (
-        <mesh key={`side-pole-${x}-${side}`} position={[x, 2.14, side * 5.03]}><boxGeometry args={[0.085, 4.28, 0.085]} /><meshStandardMaterial color="#27372e" metalness={0.72} roughness={0.32} /></mesh>
+        <mesh key={`side-pole-${x}-${side}`} position={[x, 2.14, side * 5.03]}><boxGeometry args={[0.085, 4.28, 0.085]} /><meshStandardMaterial color={frameColor} metalness={0.72} roughness={0.32} /></mesh>
       )))}
-      {[-10, 10].flatMap((x) => [-5, 0, 5].map((z) => (
-        <mesh key={`end-pole-${x}-${z}`} position={[x, 2.14, z]}><boxGeometry args={[0.085, 4.28, 0.085]} /><meshStandardMaterial color="#27372e" metalness={0.72} roughness={0.32} /></mesh>
+      {[-10, 10].flatMap((x) => (courtType === 'club' ? [-5, 0, 5] : [-5, 5]).map((z) => (
+        <mesh key={`end-pole-${x}-${z}`} position={[x, 2.14, z]}><boxGeometry args={[0.085, 4.28, 0.085]} /><meshStandardMaterial color={frameColor} metalness={0.72} roughness={0.32} /></mesh>
       )))}
-      <mesh position={[0, 4.25, -5.03]}><boxGeometry args={[20.1, 0.09, 0.09]} /><meshStandardMaterial color="#293830" metalness={0.65} roughness={0.35} /></mesh>
-      <mesh position={[0, 4.25, 5.03]}><boxGeometry args={[20.1, 0.09, 0.09]} /><meshStandardMaterial color="#293830" metalness={0.65} roughness={0.35} /></mesh>
-      {[-10.03, 10.03].map((x) => <mesh key={`end-rail-${x}`} position={[x, 4.25, 0]}><boxGeometry args={[0.09, 0.09, 10.1]} /><meshStandardMaterial color="#293830" metalness={0.65} roughness={0.35} /></mesh>)}
+      <mesh position={[0, 4.25, -5.03]}><boxGeometry args={[20.1, 0.09, 0.09]} /><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>
+      <mesh position={[0, 4.25, 5.03]}><boxGeometry args={[20.1, 0.09, 0.09]} /><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>
+      {[-10.03, 10.03].map((x) => <mesh key={`end-rail-${x}`} position={[x, 4.25, 0]}><boxGeometry args={[0.09, 0.09, 10.1]} /><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>)}
     </group>
   )
 }
@@ -165,13 +213,24 @@ function LogoSigns({ logo }: { logo: Texture }) {
   )
 }
 
-function Floodlights({ night }: { night: boolean }) {
+function Floodlights({ night, type, frameColor }: { night: boolean; type: CourtConfiguration['lighting']; frameColor: string }) {
+  if (type === 'none') return null
+
   return (
     <group>
       {[-1, 1].flatMap((end) => [-1, 1].map((side) => (
         <group key={`flood-${end}-${side}`} position={[end * 10.85, 0, side * 5.9]}>
-          <mesh position={[0, 2.85, 0]}><cylinderGeometry args={[0.055, 0.085, 5.7, 10]} /><meshStandardMaterial color="#313e36" metalness={0.72} roughness={0.32} /></mesh>
-          <mesh position={[-end * 0.3, 5.8, 0]} rotation={[0, 0, end * 0.11]}><boxGeometry args={[0.78, 0.16, 0.36]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>
+          <mesh position={[0, 2.85, 0]}><cylinderGeometry args={[0.055, 0.085, 5.7, 10]} /><meshStandardMaterial color={frameColor} metalness={0.72} roughness={0.32} /></mesh>
+          {type === 'straight' ? (
+            <mesh position={[-end * 0.3, 5.8, 0]} rotation={[0, 0, end * 0.11]}><boxGeometry args={[0.78, 0.16, 0.36]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>
+          ) : (
+            [-1, 1].map((arm) => (
+              <group key={`v-arm-${arm}`} position={[-end * 0.3, 5.62, arm * 0.12]} rotation={[0, 0, arm * 0.36]}>
+                <mesh position={[0, 0.25, 0]}><cylinderGeometry args={[0.035, 0.045, 0.65, 8]} /><meshStandardMaterial color={frameColor} metalness={0.55} roughness={0.38} /></mesh>
+                <mesh position={[0, 0.62, 0]}><boxGeometry args={[0.68, 0.14, 0.28]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>
+              </group>
+            ))
+          )}
         </group>
       )))}
     </group>
@@ -182,18 +241,62 @@ function App() {
   const [night, setNight] = useState(false)
   const [resetKey, setResetKey] = useState(0)
   const [showReference, setShowReference] = useState(false)
+  const [activeStep, setActiveStep] = useState<number | null>(0)
+  const [configuration, setConfiguration] = useState<CourtConfiguration>({
+    courtType: 'club',
+    grassType: 'monofilament',
+    grassColor: 'green',
+    frameColor: 'black',
+    lighting: 'straight',
+  })
+
+  const selectedCourt = courtTypes.find((option) => option.id === configuration.courtType)!
+  const selectedGrass = grassTypes.find((option) => option.id === configuration.grassType)!
+  const selectedGrassColor = grassColors.find((option) => option.id === configuration.grassColor)!
+  const selectedFrame = frameColors.find((option) => option.id === configuration.frameColor)!
+  const selectedLighting = lightingTypes.find((option) => option.id === configuration.lighting)!
+  const quoteBody = [
+    'Hola, me gustaría solicitar información sobre una pista de pádel con esta configuración:',
+    `Tipo de pista: ${selectedCourt.label}`,
+    `Césped: ${selectedGrass.label}`,
+    `Color: ${selectedGrassColor.label}`,
+    `Estructura: ${selectedFrame.label} (${selectedFrame.ral})`,
+    `Iluminación: ${selectedLighting.label}`,
+  ].join('\n')
+  const quoteHref = `mailto:comercial@greenmoments.es?subject=${encodeURIComponent('Configuración de pista de pádel')}&body=${encodeURIComponent(quoteBody)}`
+
+  function updateConfiguration<K extends keyof CourtConfiguration>(key: K, value: CourtConfiguration[K]) {
+    setConfiguration((current) => ({ ...current, [key]: value }))
+  }
+
+  function renderChoices<T extends { id: string; label: string; description: string }>(
+    options: readonly T[],
+    selectedId: string,
+    onSelect: (id: string) => void,
+  ) {
+    return (
+      <div className="choice-list">
+        {options.map((option) => (
+          <button key={option.id} className={`choice-card${selectedId === option.id ? ' is-selected' : ''}`} type="button" aria-pressed={selectedId === option.id} onClick={() => onSelect(option.id)}>
+            <span className="choice-check"><Check size={13} strokeWidth={2.4} /></span>
+            <span className="choice-copy"><strong>{option.label}</strong><small>{option.description}</small></span>
+          </button>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <main className="experience">
       <Canvas className="court-canvas" shadows="percentage" dpr={[1, 1.8]} camera={{ position: [17.5, 14.5, 18.5], fov: 38, near: 0.1, far: 100 }} gl={{ antialias: true, powerPreference: 'high-performance' }}>
         <Suspense fallback={null}>
-          <CourtScene night={night} resetKey={resetKey} />
+          <CourtScene night={night} resetKey={resetKey} court={configuration} />
         </Suspense>
       </Canvas>
 
       <header className="topbar">
         <a className="brand" href="https://greenmoments.es/" target="_blank" rel="noreferrer" aria-label="Green Moments, página web"><img src={`${import.meta.env.BASE_URL}green-moments-logo.png`} alt="Green Moments" /></a>
-        <div className="topbar-meta"><span className="live-dot" /> VISUALIZACIÓN 3D <span className="meta-divider">/</span> PROYECTO 01</div>
+        <div className="topbar-meta"><span className="live-dot" /> CONFIGURADOR 3D <span className="meta-divider">/</span> PISTA DE PÁDEL</div>
         <div className="topbar-actions">
           <button className="icon-button" type="button" onClick={() => setResetKey((value) => value + 1)} title="Restablecer cámara" aria-label="Restablecer cámara"><RotateCcw size={17} strokeWidth={1.7} /></button>
           <button className="icon-button reference-toggle" type="button" onClick={() => setShowReference((value) => !value)} title="Referencia del proyecto" aria-label={showReference ? 'Cerrar referencia del proyecto' : 'Abrir referencia del proyecto'} aria-expanded={showReference} aria-controls="reference-panel"><Camera size={17} strokeWidth={1.7} /></button>
@@ -201,15 +304,82 @@ function App() {
         </div>
       </header>
 
-      <section className="project-caption" aria-label="Datos de la pista">
-        <div className="caption-kicker"><span>GREEN MOMENTS</span><span className="kicker-line" /></div>
-        <h1>Una pista.<br /><em>Todo por jugar.</em></h1>
-        <div className="caption-bottom">
-          <div><span className="caption-label">SUPERFICIE</span><strong>Césped artificial</strong></div>
-          <div className="caption-separator" />
-          <div><span className="caption-label">DIMENSIONES</span><strong>20 × 10 <small>m</small></strong></div>
-        </div>
-      </section>
+      <aside className={`configurator-panel${activeStep === null ? ' is-collapsed' : ''}`} aria-label="Configurador de pista">
+        {activeStep !== null && (
+          <>
+            <div className="configurator-header">
+              <div className="configurator-heading">
+                <span className="panel-eyebrow">GREEN MOMENTS <span>·</span> CONFIGURADOR</span>
+                <h1>Diseña tu pista</h1>
+              </div>
+              <button className="icon-button panel-dismiss" type="button" onClick={() => setActiveStep(null)} aria-label="Ocultar configurador" title="Ocultar configurador"><X size={17} /></button>
+            </div>
+
+            <nav className="configurator-steps" aria-label="Pasos de configuración">
+              {configurationSteps.map((label, index) => (
+                <button key={label} className={`step-button${activeStep === index ? ' is-active' : ''}${activeStep > index ? ' is-complete' : ''}`} type="button" aria-current={activeStep === index ? 'step' : undefined} aria-label={`Paso ${index + 1}: ${label}`} onClick={() => setActiveStep(index)}>
+                  <span className="step-number">{activeStep > index ? <Check size={12} /> : index + 1}</span>
+                  <span className="step-label">{label}</span>
+                </button>
+              ))}
+              <button className={`step-button summary-step${activeStep === 5 ? ' is-active' : ''}`} type="button" aria-current={activeStep === 5 ? 'step' : undefined} aria-label="Resumen" onClick={() => setActiveStep(5)}>
+                <span className="step-number"><Check size={12} /></span>
+                <span className="step-label">Resumen</span>
+              </button>
+            </nav>
+
+            <div className="configurator-content" key={activeStep}>
+              {activeStep === 0 && <>
+                <div className="step-intro"><span>PASO 01 / 05</span><h2>¿Qué tipo de pista quieres?</h2><p>Elige la estructura que mejor se adapta a tu espacio.</p></div>
+                {renderChoices(courtTypes, configuration.courtType, (id) => updateConfiguration('courtType', id as CourtConfiguration['courtType']))}
+              </>}
+              {activeStep === 1 && <>
+                <div className="step-intro"><span>PASO 02 / 05</span><h2>¿Qué césped prefieres?</h2><p>Dos acabados deportivos para un juego preciso.</p></div>
+                {renderChoices(grassTypes, configuration.grassType, (id) => updateConfiguration('grassType', id as CourtConfiguration['grassType']))}
+              </>}
+              {activeStep === 2 && <>
+                <div className="step-intro"><span>PASO 03 / 05</span><h2>Elige el color del césped</h2><p>La pista se actualiza al instante.</p></div>
+                <div className="swatch-grid turf-swatches">
+                  {grassColors.map((option) => <button key={option.id} className={`swatch-option${configuration.grassColor === option.id ? ' is-selected' : ''}`} type="button" aria-label={option.label} aria-pressed={configuration.grassColor === option.id} onClick={() => updateConfiguration('grassColor', option.id)}><span className="color-swatch" style={{ backgroundColor: option.color }}><Check size={14} /></span><span>{option.label}</span></button>)}
+                </div>
+              </>}
+              {activeStep === 3 && <>
+                <div className="step-intro"><span>PASO 04 / 05</span><h2>Color lacado de la estructura</h2><p>Acabado en pintura al horno · carta RAL.</p></div>
+                <div className="swatch-grid frame-swatches">
+                  {frameColors.map((option) => <button key={option.id} className={`swatch-option${configuration.frameColor === option.id ? ' is-selected' : ''}`} type="button" aria-label={`${option.label} ${option.ral}`} aria-pressed={configuration.frameColor === option.id} onClick={() => updateConfiguration('frameColor', option.id)}><span className="color-swatch" style={{ backgroundColor: option.color }}><Check size={14} /></span><span>{option.label}<small>{option.ral}</small></span></button>)}
+                </div>
+              </>}
+              {activeStep === 4 && <>
+                <div className="step-intro"><span>PASO 05 / 05</span><h2>¿Qué tipo de focos?</h2><p>Elige una iluminación integrada en la estructura.</p></div>
+                {renderChoices(lightingTypes, configuration.lighting, (id) => updateConfiguration('lighting', id as CourtConfiguration['lighting']))}
+              </>}
+              {activeStep === 5 && <>
+                <div className="step-intro"><span>CONFIGURACIÓN COMPLETA</span><h2>Tu pista</h2><p>Revisa tu selección y solicita información.</p></div>
+                <dl className="configuration-summary">
+                  {[
+                    ['Tipo de pista', selectedCourt.label, 0],
+                    ['Césped', selectedGrass.label, 1],
+                    ['Color del césped', selectedGrassColor.label, 2],
+                    ['Estructura', `${selectedFrame.label} · ${selectedFrame.ral}`, 3],
+                    ['Iluminación', selectedLighting.label, 4],
+                  ].map(([label, value, editStep]) => <div className="summary-row" key={label}><dt>{label}</dt><dd>{value}</dd><button className="summary-edit" type="button" aria-label={`Editar ${label}`} onClick={() => setActiveStep(Number(editStep))}><Pencil size={13} /></button></div>)}
+                </dl>
+                <a className="quote-link" href={quoteHref}><Mail size={16} /> Solicitar presupuesto <ArrowRight size={15} /></a>
+                <p className="quote-note">Se abrirá un correo con las opciones de tu pista.</p>
+              </>}
+            </div>
+
+            <footer className="configurator-footer">
+              <span className="step-count">{activeStep < 5 ? `PASO ${String(activeStep + 1).padStart(2, '0')} / 05` : 'RESUMEN'}</span>
+              <div className="step-actions">
+                {activeStep > 0 && <button className="back-button" type="button" onClick={() => setActiveStep((current) => current === null ? null : Math.max(0, current - 1))}><ArrowLeft size={15} /> Atrás</button>}
+                {activeStep < 5 && <button className="next-button" type="button" onClick={() => setActiveStep((current) => current === null ? 0 : Math.min(5, current + 1))}>Siguiente <ArrowRight size={15} /></button>}
+              </div>
+            </footer>
+          </>
+        )}
+        {activeStep === null && <button className="configurator-reopen" type="button" onClick={() => setActiveStep(0)}><SlidersHorizontal size={16} /> Configurar pista</button>}
+      </aside>
 
       <aside id="reference-panel" className="reference-panel" hidden={!showReference}>
         <div className="reference-heading"><span>REFERENCIA DE PROYECTO</span><button className="icon-button reference-close" type="button" onClick={() => setShowReference(false)} title="Cerrar referencia" aria-label="Cerrar referencia del proyecto"><X size={15} strokeWidth={1.8} /></button></div>
