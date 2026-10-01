@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { ContactShadows, OrbitControls, useTexture } from '@react-three/drei'
+import { ContactShadows, OrbitControls, Sky, useTexture } from '@react-three/drei'
 import { BufferGeometry, CanvasTexture, DoubleSide, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace } from 'three'
 import { ArrowLeft, ArrowRight, Camera, Check, Mail, Moon, Move3D, Pencil, RotateCcw, SlidersHorizontal, Sun, X } from 'lucide-react'
 import './App.css'
@@ -91,6 +91,61 @@ function createTurfTexture(colorId: CourtConfiguration['grassColor'], grassType:
   return texture
 }
 
+function createPaverTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 512
+  canvas.height = 512
+  const context = canvas.getContext('2d')
+  if (!context) return new CanvasTexture(canvas)
+
+  context.fillStyle = '#798b79'
+  context.fillRect(0, 0, canvas.width, canvas.height)
+  for (let row = 0; row < 8; row += 1) {
+    const offset = row % 2 === 0 ? 0 : -48
+    for (let column = -1; column < 5; column += 1) {
+      const shade = 184 + Math.floor(Math.random() * 25)
+      context.fillStyle = `rgb(${shade}, ${shade + 3}, ${shade - 8})`
+      context.fillRect(column * 128 + offset + 2, row * 64 + 2, 124, 60)
+    }
+  }
+
+  const texture = new CanvasTexture(canvas)
+  texture.colorSpace = SRGBColorSpace
+  texture.wrapS = RepeatWrapping
+  texture.wrapT = RepeatWrapping
+  texture.repeat.set(8, 5)
+  texture.anisotropy = 8
+  return texture
+}
+
+function createLandscapeTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 512
+  canvas.height = 512
+  const context = canvas.getContext('2d')
+  if (!context) return new CanvasTexture(canvas)
+
+  context.fillStyle = '#708d68'
+  context.fillRect(0, 0, canvas.width, canvas.height)
+  const grassShades = ['#789771', '#849d78', '#66845f', '#91a37e']
+  for (let index = 0; index < 18000; index += 1) {
+    const x = Math.random() * canvas.width
+    const y = Math.random() * canvas.height
+    context.globalAlpha = 0.12 + Math.random() * 0.2
+    context.fillStyle = grassShades[Math.floor(Math.random() * grassShades.length)]
+    context.fillRect(x, y, 1 + Math.random() * 3, 1 + Math.random() * 4)
+  }
+  context.globalAlpha = 1
+
+  const texture = new CanvasTexture(canvas)
+  texture.colorSpace = SRGBColorSpace
+  texture.wrapS = RepeatWrapping
+  texture.wrapT = RepeatWrapping
+  texture.repeat.set(12, 12)
+  texture.anisotropy = 8
+  return texture
+}
+
 function CourtScene({ night, court }: { night: boolean; court: CourtConfiguration }) {
   const turf = useMemo(() => createTurfTexture(court.grassColor, court.grassType), [court.grassColor, court.grassType])
   const frameColor = frameColors.find((option) => option.id === court.frameColor)?.color ?? '#242a27'
@@ -121,18 +176,16 @@ function CourtScene({ night, court }: { night: boolean; court: CourtConfiguratio
 
   return (
     <>
-      <color attach="background" args={[night ? '#18221d' : '#cfd9d1']} />
-      <fog attach="fog" args={[night ? '#18221d' : '#cfd9d1', 27, 58]} />
+      <color attach="background" args={[night ? '#18221d' : '#a9c7c8']} />
+      <fog attach="fog" args={[night ? '#18221d' : '#b9cdca', 38, 180]} />
+      <Sky distance={90} sunPosition={night ? [0, -1, 0] : [-0.35, 0.72, 0.45]} turbidity={night ? 2 : 5} rayleigh={night ? 0.25 : 1.4} mieCoefficient={0.004} mieDirectionalG={0.78} />
       <hemisphereLight args={['#e9f7ee', '#38443a', night ? 0.62 : 2.1]} />
       <directionalLight position={[-7, 15, 8]} intensity={night ? 0.22 : 3.2} castShadow shadow-mapSize={[2048, 2048]} />
       {court.lighting !== 'none' && floodlightPositions.map(([x, y, z]) => (
         <pointLight key={`${x}-${z}`} position={[x, y, z]} intensity={night ? 18 : 0.3} distance={night ? 24 : 6} color="#f1f8d6" decay={2} />
       ))}
 
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.14, 0]} receiveShadow>
-        <planeGeometry args={[60, 60]} />
-        <meshStandardMaterial color={night ? '#26342c' : '#b2bdb3'} roughness={0.94} />
-      </mesh>
+      <OutdoorEnvironment night={night} />
       <mesh position={[0, 0, 0]} receiveShadow castShadow>
         <boxGeometry args={[20.35, 0.16, 10.35]} />
         <meshStandardMaterial color="#1e3228" roughness={0.7} />
@@ -164,6 +217,43 @@ function CourtScene({ night, court }: { night: boolean; court: CourtConfiguratio
       <ContactShadows position={[0, -0.055, 0]} opacity={night ? 0.45 : 0.25} scale={28} blur={2.8} far={8} />
       <OrbitControls makeDefault target={[0, 1.2, 0]} minDistance={13} maxDistance={32} minPolarAngle={0.35} maxPolarAngle={1.42} enablePan={false} dampingFactor={0.08} />
     </>
+  )
+}
+
+function OutdoorEnvironment({ night }: { night: boolean }) {
+  const pavers = useMemo(() => createPaverTexture(), [])
+  const landscape = useMemo(() => createLandscapeTexture(), [])
+  const treePositions: [number, number][] = [
+    [-12, -9], [-3.5, -9.7], [5, -10], [12, -9],
+    [-12, 9], [-3.5, 9.7], [5, 10], [12, 9],
+  ]
+
+  return (
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.25, 0]} receiveShadow>
+        <planeGeometry args={[120, 120]} />
+        <meshStandardMaterial map={landscape} color={night ? '#9aa194' : '#ffffff'} roughness={1} />
+      </mesh>
+      <mesh position={[0, -0.15, 0]} receiveShadow>
+        <boxGeometry args={[26, 0.14, 16]} />
+        <meshStandardMaterial map={pavers} color={night ? '#89948a' : '#ffffff'} roughness={0.92} />
+      </mesh>
+      {treePositions.map(([x, z], index) => <ParkTree key={`park-tree-${index}`} x={x} z={z} variant={index % 3} />)}
+    </group>
+  )
+}
+
+function ParkTree({ x, z, variant }: { x: number; z: number; variant: number }) {
+  const leaves = ['#54734f', '#66865b', '#486a4b']
+  const foliageColor = leaves[variant]
+  return (
+    <group position={[x, -0.24, z]}>
+      <mesh position={[0, 0.22, 0]} castShadow receiveShadow><boxGeometry args={[2.25, 0.44, 1.25]} /><meshStandardMaterial color="#56634f" roughness={0.88} /></mesh>
+      <mesh position={[0, 1.22, 0]} castShadow><cylinderGeometry args={[0.11, 0.18, 1.85, 8]} /><meshStandardMaterial color="#735b43" roughness={0.94} /></mesh>
+      <mesh position={[0, 2.56, 0]} castShadow><sphereGeometry args={[1.02, 14, 12]} /><meshStandardMaterial color={foliageColor} roughness={0.92} /></mesh>
+      <mesh position={[-0.42, 3.03, 0.12]} castShadow><sphereGeometry args={[0.72, 12, 10]} /><meshStandardMaterial color="#6e8d62" roughness={0.95} /></mesh>
+      <mesh position={[0.46, 2.98, -0.16]} castShadow><sphereGeometry args={[0.69, 12, 10]} /><meshStandardMaterial color="#78966a" roughness={0.95} /></mesh>
+    </group>
   )
 }
 
