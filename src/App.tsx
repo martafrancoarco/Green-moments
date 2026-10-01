@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { ContactShadows, OrbitControls, useTexture } from '@react-three/drei'
-import { BufferGeometry, CanvasTexture, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace } from 'three'
+import { BufferGeometry, CanvasTexture, DoubleSide, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace } from 'three'
 import { ArrowLeft, ArrowRight, Camera, Check, Mail, Moon, Move3D, Pencil, RotateCcw, SlidersHorizontal, Sun, X } from 'lucide-react'
 import './App.css'
 
@@ -139,13 +139,13 @@ function CourtScene({ night, resetKey, court }: { night: boolean; resetKey: numb
       {[-10, 10].map((x) => (
         <mesh key={`end-glass-${x}`} position={[x, 1.57, 0]} castShadow>
           <boxGeometry args={[0.07, 3.05, 9.96]} />
-          <meshPhysicalMaterial color="#a6c5ba" transparent opacity={0.22} roughness={0.12} metalness={0.12} />
+          <meshPhysicalMaterial color="#a6c5ba" transparent opacity={0.22} roughness={0.12} metalness={0.12} depthWrite={false} side={DoubleSide} />
         </mesh>
       ))}
       {[-1, 1].map((side) => (
         <mesh key={`side-glass-${side}`} position={[0, 1.53, side * 5]} castShadow>
           <boxGeometry args={[14.7, 2.96, 0.07]} />
-          <meshPhysicalMaterial color="#a6c5ba" transparent opacity={0.2} roughness={0.12} metalness={0.12} />
+          <meshPhysicalMaterial color="#a6c5ba" transparent opacity={0.2} roughness={0.12} metalness={0.12} depthWrite={false} side={DoubleSide} />
         </mesh>
       ))}
       <lineSegments geometry={fenceGeometry}><lineBasicMaterial color="#34433b" transparent opacity={0.74} /></lineSegments>
@@ -204,9 +204,15 @@ function LogoSigns() {
   return (
     <group>
       {[-1, 1].map((end) => (
-        <group key={`sign-${end}`} position={[end * 9.9, 2.45, 0]} rotation={[0, end === -1 ? Math.PI / 2 : -Math.PI / 2, 0]}>
-          <mesh position={[0, 0, -0.02]}><planeGeometry args={[3.1, 1.08]} /><meshBasicMaterial color="#f7f8ef" transparent opacity={0.3} depthWrite={false} /></mesh>
-          <mesh position={[0, 0, 0.005]}><planeGeometry args={[2.88, 0.88]} /><meshBasicMaterial map={logo} transparent side={2} toneMapped={false} /></mesh>
+        <group key={`sign-${end}`} position={[end * 10.06, 2.45, 0]} rotation={[0, end === -1 ? Math.PI / 2 : -Math.PI / 2, 0]}>
+          <mesh position={[0, 0, -0.02]}><planeGeometry args={[2.82, 1.4]} /><meshBasicMaterial color="#f7f8ef" transparent opacity={0.36} depthWrite={false} side={DoubleSide} /></mesh>
+          <mesh position={[0, 0, 0.005]}><planeGeometry args={[2.62, 1.2]} /><meshBasicMaterial map={logo} transparent depthWrite={false} side={DoubleSide} toneMapped={false} /></mesh>
+        </group>
+      ))}
+      {[-1, 1].map((side) => (
+        <group key={`long-sign-${side}`} position={[4.25, 2.45, side * 5.06]} rotation={[0, side === 1 ? 0 : Math.PI, 0]}>
+          <mesh position={[0, 0, -0.02]}><planeGeometry args={[2.82, 1.4]} /><meshBasicMaterial color="#f7f8ef" transparent opacity={0.36} depthWrite={false} side={DoubleSide} /></mesh>
+          <mesh position={[0, 0, 0.005]}><planeGeometry args={[2.62, 1.2]} /><meshBasicMaterial map={logo} transparent depthWrite={false} side={DoubleSide} toneMapped={false} /></mesh>
         </group>
       ))}
     </group>
