@@ -223,10 +223,6 @@ function CourtScene({ night, court }: { night: boolean; court: CourtConfiguratio
 function OutdoorEnvironment({ night }: { night: boolean }) {
   const pavers = useMemo(() => createPaverTexture(), [])
   const landscape = useMemo(() => createLandscapeTexture(), [])
-  const treePositions: [number, number][] = [
-    [-12, -9], [-3.5, -9.7], [5, -10], [12, -9],
-    [-12, 9], [-3.5, 9.7], [5, 10], [12, 9],
-  ]
 
   return (
     <group>
@@ -238,21 +234,6 @@ function OutdoorEnvironment({ night }: { night: boolean }) {
         <boxGeometry args={[26, 0.14, 16]} />
         <meshStandardMaterial map={pavers} color={night ? '#89948a' : '#ffffff'} roughness={0.92} />
       </mesh>
-      {treePositions.map(([x, z], index) => <ParkTree key={`park-tree-${index}`} x={x} z={z} variant={index % 3} />)}
-    </group>
-  )
-}
-
-function ParkTree({ x, z, variant }: { x: number; z: number; variant: number }) {
-  const leaves = ['#54734f', '#66865b', '#486a4b']
-  const foliageColor = leaves[variant]
-  return (
-    <group position={[x, -0.24, z]}>
-      <mesh position={[0, 0.22, 0]} castShadow receiveShadow><boxGeometry args={[2.25, 0.44, 1.25]} /><meshStandardMaterial color="#56634f" roughness={0.88} /></mesh>
-      <mesh position={[0, 1.22, 0]} castShadow><cylinderGeometry args={[0.11, 0.18, 1.85, 8]} /><meshStandardMaterial color="#735b43" roughness={0.94} /></mesh>
-      <mesh position={[0, 2.56, 0]} castShadow><sphereGeometry args={[1.02, 14, 12]} /><meshStandardMaterial color={foliageColor} roughness={0.92} /></mesh>
-      <mesh position={[-0.42, 3.03, 0.12]} castShadow><sphereGeometry args={[0.72, 12, 10]} /><meshStandardMaterial color="#6e8d62" roughness={0.95} /></mesh>
-      <mesh position={[0.46, 2.98, -0.16]} castShadow><sphereGeometry args={[0.69, 12, 10]} /><meshStandardMaterial color="#78966a" roughness={0.95} /></mesh>
     </group>
   )
 }

@@ -1,6 +1,6 @@
 # Green Moments | Pista de pádel
 
-Visualización 3D interactiva de una pista de pádel con césped artificial, cerramiento de vidrio y malla, iluminación, pavimento exterior, vegetación y señalización Green Moments.
+Visualización 3D interactiva de una pista de pádel con césped artificial, cerramiento de vidrio y malla, iluminación, pradera texturizada, pavimento exterior y señalización Green Moments.
 
 Permite configurar una pista en cinco pasos y ver cada cambio directamente en el render.
 
