@@ -3,6 +3,6 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: process.env.GITHUB_PAGES === 'true' ? '/Green-moments/' : '/',
+  base: process.env.GITHUB_PAGES_BASE ?? (process.env.GITHUB_PAGES === 'true' ? '/Green-moments/' : '/'),
   plugins: [react()],
 })
