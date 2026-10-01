@@ -221,9 +221,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
 .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #73a951; box-shadow: 0 0 0 3px rgba(115,169,81,.13); }
 .meta-divider { color: #a4ada5; }
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
-.icon-button, .light-toggle, .help-button { display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(36,53,42,.15); color: #344a39; background: rgba(255,255,255,.72); cursor: pointer; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
+.icon-button, .light-toggle { display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(36,53,42,.15); color: #344a39; background: rgba(255,255,255,.72); cursor: pointer; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
 .icon-button { width: 36px; height: 36px; border-radius: 50%; }
-.icon-button:hover, .help-button:hover { background: #fff; border-color: #65846c; transform: translateY(-1px); }
+.icon-button:hover { background: #fff; border-color: #65846c; transform: translateY(-1px); }
 .reference-toggle:hover { transform: none; }
 .light-toggle { gap: 8px; min-width: 85px; height: 36px; padding: 0 12px; border-radius: 2px; }
 .light-toggle:hover { background: #fff; border-color: #65846c; }
@@ -246,7 +246,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
 .reference-foot span:last-child { flex: 0 0 auto; }
 .interaction-hint { position: absolute; left: 50%; bottom: 20px; display: flex; align-items: center; gap: 9px; color: rgba(35,54,41,.8); transform: translateX(-50%); white-space: nowrap; font-size: 8px; z-index: 1; pointer-events: none; }
 .hint-dot { color: #849786; font-size: 13px; }
-.help-button { position: absolute; right: 49px; top: 95px; width: 35px; height: 35px; border-radius: 50%; z-index: 2; }
 .edge-coordinate { position: absolute; color: rgba(42,62,47,.58); font-size: 8px; z-index: 1; pointer-events: none; }
 .coordinate-top { top: 95px; left: 49px; }
 .coordinate-top span { margin: 0 4px; color: #8ca18d; }
@@ -265,7 +264,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
   .reference-panel { right: 24px; bottom: 35px; width: 205px; }
   .reference-image { height: 88px; }
   .coordinate-top { left: 26px; top: 82px; }
-  .help-button { right: 24px; top: 82px; }
   .coordinate-bottom { display: none; }
 }
 @media (max-width: 600px) {
@@ -286,7 +284,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
   .interaction-hint { right: 15px; bottom: 13px; left: auto; gap: 6px; transform: none; font-size: 6px; }
   .interaction-hint svg { width: 12px; height: 12px; }
   .hint-dot { font-size: 10px; }
-  .help-button { top: 76px; right: auto; left: 15px; width: 31px; height: 31px; }
   .coordinate-top { top: 115px; left: 19px; font-size: 7px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; } }

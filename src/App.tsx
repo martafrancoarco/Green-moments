@@ -2,7 +2,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { ContactShadows, OrbitControls, useTexture } from '@react-three/drei'
 import { BufferGeometry, CanvasTexture, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace } from 'three'
-import { ArrowLeft, ArrowRight, Camera, Check, CircleHelp, Mail, Moon, Move3D, Pencil, RotateCcw, SlidersHorizontal, Sun, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Camera, Check, Mail, Moon, Move3D, Pencil, RotateCcw, SlidersHorizontal, Sun, X } from 'lucide-react'
 import './App.css'
 
 const courtTypes = [
@@ -393,7 +393,6 @@ function App() {
       </aside>
 
       <div className="interaction-hint"><Move3D size={15} strokeWidth={1.7} /><span>ARRASTRA PARA EXPLORAR</span><span className="hint-dot">·</span><span>RUEDA PARA ZOOM</span></div>
-      <button className="help-button" type="button" title="Visualización conceptual de pista de pádel" aria-label="Acerca de esta visualización"><CircleHelp size={17} strokeWidth={1.7} /></button>
       <div className="edge-coordinate coordinate-top">40°12′ N <span>·</span> 3°55′ O</div>
       <div className="edge-coordinate coordinate-bottom">GM / PÁDEL 2026</div>
     </main>
