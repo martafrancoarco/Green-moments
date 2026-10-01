@@ -296,7 +296,7 @@ function App() {
   }
 
   return (
-    <main className="experience">
+    <main className={`experience${activeStep === null ? ' is-configurator-collapsed' : ''}`}>
       <Canvas className="court-canvas" shadows="percentage" dpr={[1, 1.8]} camera={{ position: [17.5, 14.5, 18.5], fov: 38, near: 0.1, far: 100 }} gl={{ antialias: true, powerPreference: 'high-performance' }}>
         <Suspense fallback={null}>
           <CourtScene night={night} resetKey={resetKey} court={configuration} />
@@ -397,8 +397,6 @@ function App() {
       </aside>
 
       <div className="interaction-hint"><Move3D size={15} strokeWidth={1.7} /><span>ARRASTRA PARA EXPLORAR</span><span className="hint-dot">·</span><span>RUEDA PARA ZOOM</span></div>
-      <div className="edge-coordinate coordinate-top">40°12′ N <span>·</span> 3°55′ O</div>
-      <div className="edge-coordinate coordinate-bottom">GM / PÁDEL 2026</div>
     </main>
   )
 }

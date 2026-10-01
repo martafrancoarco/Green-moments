@@ -216,7 +216,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
 .topbar { position: absolute; inset: 0 0 auto; height: 76px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; background: rgba(249,250,245,.91); border-bottom: 1px solid rgba(38,61,44,.13); backdrop-filter: blur(18px); z-index: 2; }
 .brand { display: flex; align-items: center; width: 194px; height: 54px; }
 .brand img { display: block; width: 178px; max-height: 48px; object-fit: contain; object-position: left center; }
-.topbar-meta, .caption-kicker, .caption-label, .reference-heading, .reference-foot, .interaction-hint, .edge-coordinate, .light-toggle { font-family: 'Manrope','Avenir Next',sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0; }
+.topbar-meta, .caption-kicker, .caption-label, .reference-heading, .reference-foot, .interaction-hint, .light-toggle { font-family: 'Manrope','Avenir Next',sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0; }
 .topbar-meta { display: flex; align-items: center; gap: 9px; color: #67746a; }
 .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #73a951; box-shadow: 0 0 0 3px rgba(115,169,81,.13); }
 .meta-divider { color: #a4ada5; }
@@ -246,10 +246,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
 .reference-foot span:last-child { flex: 0 0 auto; }
 .interaction-hint { position: absolute; left: 50%; bottom: 20px; display: flex; align-items: center; gap: 9px; color: rgba(35,54,41,.8); transform: translateX(-50%); white-space: nowrap; font-size: 8px; z-index: 1; pointer-events: none; }
 .hint-dot { color: #849786; font-size: 13px; }
-.edge-coordinate { position: absolute; color: rgba(42,62,47,.58); font-size: 8px; z-index: 1; pointer-events: none; }
-.coordinate-top { top: 95px; left: 49px; }
-.coordinate-top span { margin: 0 4px; color: #8ca18d; }
-.coordinate-bottom { right: 49px; bottom: 19px; }
 .scene-label, .loading-label { display: inline-block; color: #f1f4eb; font-family: 'Manrope',sans-serif; font-size: 8px; font-weight: 700; letter-spacing: 0; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
 .loading-label { color: #26382c; font-size: 12px; }
 @keyframes arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -263,8 +259,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
   .project-caption h1 { font-size: 38px; }
   .reference-panel { right: 24px; bottom: 35px; width: 205px; }
   .reference-image { height: 88px; }
-  .coordinate-top { left: 26px; top: 82px; }
-  .coordinate-bottom { display: none; }
 }
 @media (max-width: 600px) {
   .topbar { height: 60px; padding: 0 17px; }
@@ -284,7 +278,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
   .interaction-hint { right: 15px; bottom: 13px; left: auto; gap: 6px; transform: none; font-size: 6px; }
   .interaction-hint svg { width: 12px; height: 12px; }
   .hint-dot { font-size: 10px; }
-  .coordinate-top { top: 115px; left: 19px; font-size: 7px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; } }
 
