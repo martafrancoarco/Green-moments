@@ -325,7 +325,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
 .configurator-steps { display: flex; align-items: center; gap: 0; padding: 0 20px 15px; border-bottom: 1px solid rgba(41,62,46,.12); }
 .step-button { position: relative; z-index: 0; display: flex; flex: 1 1 0; justify-content: flex-start; align-items: center; min-width: 0; padding: 0; border: 0; color: #788479; background: transparent; cursor: pointer; }
 .step-button:not(:last-child)::after { position: absolute; z-index: -1; top: 50%; right: -1px; left: 23px; height: 1px; content: ''; background: #d8ded7; }
-.step-number { display: grid; width: 23px; height: 23px; flex: 0 0 23px; place-items: center; border: 1px solid #d5ddd4; border-radius: 50%; color: #7d897d; background: #f9faf6; font-family: 'Manrope',sans-serif; font-size: 9px; font-weight: 700; transition: color .18s ease, background .18s ease, border-color .18s ease; }
+.step-number { display: grid; width: 23px; height: 23px; flex: 0 0 23px; place-items: center; border: 1px solid #d5ddd4; border-radius: 50%; color: #7d897d; background: #f9faf6; font-family: 'Manrope',sans-serif; font-size: 9px; font-weight: 700; line-height: 1; text-align: center; font-variant-numeric: tabular-nums; transition: color .18s ease, background .18s ease, border-color .18s ease; }
 .step-button.is-active .step-number { border-color: #286343; color: #fff; background: #286343; }
 .step-button.is-complete .step-number { border-color: #adc4ae; color: #286343; background: #e3ede2; }
 .step-button:hover .step-number { border-color: #63846a; }
