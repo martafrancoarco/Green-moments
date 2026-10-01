@@ -445,7 +445,7 @@ function App() {
       </Canvas>
 
       <header className="topbar">
-        <a className="brand" href="https://greenmoments.es/" target="_blank" rel="noreferrer" aria-label="Green Moments, página web"><img src={`${import.meta.env.BASE_URL}green-moments-logo.png`} alt="Green Moments" /></a>
+        <div className="brand"><img src={`${import.meta.env.BASE_URL}green-moments-logo.png`} alt="Green Moments" /></div>
         <div className="topbar-meta"><span className="live-dot" /> CONFIGURADOR 3D <span className="meta-divider">/</span> PISTA DE PÁDEL</div>
         <div className="topbar-actions">
           <button className="icon-button" type="button" onClick={resetConfigurator} title="Restablecer cámara y configuración" aria-label="Restablecer cámara y configuración"><RotateCcw size={17} strokeWidth={1.7} /></button>
