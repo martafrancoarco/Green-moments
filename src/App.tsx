@@ -319,7 +319,11 @@ function App() {
         <div className="topbar-actions">
           <button className="icon-button" type="button" onClick={resetConfigurator} title="Restablecer cámara y configuración" aria-label="Restablecer cámara y configuración"><RotateCcw size={17} strokeWidth={1.7} /></button>
           <button className="icon-button reference-toggle" type="button" onClick={() => setShowReference((value) => !value)} title="Referencia del proyecto" aria-label={showReference ? 'Cerrar referencia del proyecto' : 'Abrir referencia del proyecto'} aria-expanded={showReference} aria-controls="reference-panel"><Camera size={17} strokeWidth={1.7} /></button>
-          <button className="light-toggle" type="button" onClick={() => setNight((value) => !value)} aria-label={night ? 'Cambiar a luz de día' : 'Cambiar a luz nocturna'}>{night ? <Moon size={16} /> : <Sun size={16} />}<span>{night ? 'NOCHE' : 'DÍA'}</span></button>
+          <button className={`lighting-switch${night ? ' is-night' : ''}`} type="button" role="switch" aria-checked={night} aria-label="Modo nocturno" title={night ? 'Cambiar a luz de día' : 'Cambiar a luz nocturna'} onClick={() => setNight((value) => !value)}>
+            <span className="lighting-mode day-mode"><Sun size={13} /><span>Día</span></span>
+            <span className="lighting-track"><span className="lighting-thumb" /></span>
+            <span className="lighting-mode night-mode"><Moon size={13} /><span>Noche</span></span>
+          </button>
         </div>
       </header>
 

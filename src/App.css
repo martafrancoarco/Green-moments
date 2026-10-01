@@ -216,17 +216,24 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
 .topbar { position: absolute; inset: 0 0 auto; height: 76px; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; background: rgba(249,250,245,.91); border-bottom: 1px solid rgba(38,61,44,.13); backdrop-filter: blur(18px); z-index: 2; }
 .brand { display: flex; align-items: center; width: 194px; height: 54px; }
 .brand img { display: block; width: 178px; max-height: 48px; object-fit: contain; object-position: left center; }
-.topbar-meta, .caption-kicker, .caption-label, .reference-heading, .reference-foot, .interaction-hint, .light-toggle { font-family: 'Manrope','Avenir Next',sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0; }
+.topbar-meta, .caption-kicker, .caption-label, .reference-heading, .reference-foot, .interaction-hint { font-family: 'Manrope','Avenir Next',sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0; }
 .topbar-meta { display: flex; align-items: center; gap: 9px; color: #67746a; }
 .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #73a951; box-shadow: 0 0 0 3px rgba(115,169,81,.13); }
 .meta-divider { color: #a4ada5; }
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
-.icon-button, .light-toggle { display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(36,53,42,.15); color: #344a39; background: rgba(255,255,255,.72); cursor: pointer; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
+.icon-button { display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(36,53,42,.15); color: #344a39; background: rgba(255,255,255,.72); cursor: pointer; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
 .icon-button { width: 36px; height: 36px; border-radius: 50%; }
 .icon-button:hover { background: #fff; border-color: #65846c; transform: translateY(-1px); }
 .reference-toggle:hover { transform: none; }
-.light-toggle { gap: 8px; min-width: 85px; height: 36px; padding: 0 12px; border-radius: 2px; }
-.light-toggle:hover { background: #fff; border-color: #65846c; }
+.lighting-switch { display: inline-flex; min-width: 139px; height: 36px; align-items: center; justify-content: space-between; gap: 6px; padding: 0 9px; border: 1px solid rgba(36,53,42,.18); border-radius: 20px; color: #526453; background: rgba(255,255,255,.8); cursor: pointer; transition: border-color .18s ease, background .18s ease; }
+.lighting-switch:hover { border-color: #65846c; background: #fff; }
+.lighting-mode { display: inline-flex; align-items: center; gap: 3px; color: #899489; font-family: 'Manrope','Avenir Next',sans-serif; font-size: 8px; font-weight: 700; line-height: 1; }
+.lighting-mode svg { flex: 0 0 auto; }
+.lighting-track { position: relative; display: block; width: 26px; height: 15px; flex: 0 0 26px; border-radius: 99px; background: #93aa96; transition: background .18s ease; }
+.lighting-thumb { position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(25,42,29,.28); transition: transform .18s ease; }
+.lighting-switch.is-night .lighting-track { background: #286343; }
+.lighting-switch.is-night .lighting-thumb { transform: translateX(11px); }
+.lighting-switch:not(.is-night) .day-mode, .lighting-switch.is-night .night-mode { color: #286343; }
 .project-caption { position: absolute; left: 50px; bottom: 49px; width: min(390px,calc(100vw - 390px)); color: var(--ink); z-index: 1; pointer-events: none; animation: arrive .75s .12s both cubic-bezier(.2,.75,.25,1); }
 .caption-kicker { display: flex; align-items: center; gap: 12px; color: #426448; }
 .kicker-line { width: 41px; height: 1px; background: #719177; }
@@ -265,7 +272,12 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
   .brand { width: 128px; }
   .brand img { width: 126px; max-height: 39px; }
   .icon-button { width: 34px; height: 34px; }
-  .light-toggle { min-width: 74px; height: 34px; padding: 0 9px; }
+  .lighting-switch { min-width: 119px; height: 34px; gap: 5px; padding: 0 7px; }
+  .lighting-mode { gap: 2px; font-size: 7px; }
+  .lighting-mode svg { width: 12px; height: 12px; }
+  .lighting-track { width: 24px; height: 14px; flex-basis: 24px; }
+  .lighting-thumb { width: 10px; height: 10px; }
+  .lighting-switch.is-night .lighting-thumb { transform: translateX(10px); }
   .project-caption { left: 20px; bottom: 28px; width: calc(100vw - 40px); }
   .project-caption h1 { margin: 10px 0 15px; font-size: 32px; }
   .caption-bottom { width: 205px; gap: 13px; padding-top: 11px; }
@@ -278,6 +290,13 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
   .interaction-hint { right: 15px; bottom: 13px; left: auto; gap: 6px; transform: none; font-size: 6px; }
   .interaction-hint svg { width: 12px; height: 12px; }
   .hint-dot { font-size: 10px; }
+}
+@media (max-width: 360px) {
+  .topbar { padding: 0 10px; }
+  .brand { width: 100px; }
+  .brand img { width: 98px; }
+  .topbar-actions { gap: 6px; }
+  .lighting-switch { min-width: 109px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; } }
 
