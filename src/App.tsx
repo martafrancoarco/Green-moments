@@ -158,6 +158,7 @@ function CourtScene({ night, court }: { night: boolean; court: CourtConfiguratio
   const turf = useMemo(() => createTurfTexture(court.grassColor, court.grassType), [court.grassColor, court.grassType])
   const frameColor = frameColors.find((option) => option.id === court.frameColor)?.color ?? '#242a27'
   const courtWidthScale = court.courtType === 'individual' ? 0.62 : 1
+  const isIndoor = court.courtType === 'indoor'
 
   const fenceGeometry = useMemo(() => {
     const points: number[] = []
@@ -185,16 +186,19 @@ function CourtScene({ night, court }: { night: boolean; court: CourtConfiguratio
 
   return (
     <>
-      <color attach="background" args={[night ? '#18221d' : '#a9c7c8']} />
-      <fog attach="fog" args={[night ? '#18221d' : '#b9cdca', 38, 180]} />
-      <Sky distance={90} sunPosition={night ? [0, -1, 0] : [-0.35, 0.72, 0.45]} turbidity={night ? 2 : 5} rayleigh={night ? 0.25 : 1.4} mieCoefficient={0.004} mieDirectionalG={0.78} />
-      <hemisphereLight args={['#e9f7ee', '#38443a', night ? 0.62 : 2.1]} />
-      <directionalLight position={[-7, 15, 8]} intensity={night ? 0.22 : 3.2} castShadow shadow-mapSize={[2048, 2048]} />
+      <color attach="background" args={[isIndoor ? night ? '#3b4543' : '#8c9793' : night ? '#18221d' : '#a9c7c8']} />
+      <fog attach="fog" args={[isIndoor ? night ? '#424d4a' : '#aab4b0' : night ? '#18221d' : '#b9cdca', isIndoor ? 30 : 38, isIndoor ? 125 : 180]} />
+      {!isIndoor && <Sky distance={90} sunPosition={night ? [0, -1, 0] : [-0.35, 0.72, 0.45]} turbidity={night ? 2 : 5} rayleigh={night ? 0.25 : 1.4} mieCoefficient={0.004} mieDirectionalG={0.78} />}
+      <hemisphereLight args={['#e9f7ee', '#38443a', night ? 0.62 : isIndoor ? 1.65 : 2.1]} />
+      <directionalLight position={[-7, 15, 8]} intensity={night ? 0.22 : isIndoor ? 1.4 : 3.2} castShadow shadow-mapSize={[2048, 2048]} />
       {floodlightPositions.map(([x, y, z]) => (
         <pointLight key={`${x}-${z}`} position={[x, y, z]} intensity={night ? 18 : 0.3} distance={night ? 24 : 6} color="#f1f8d6" decay={2} />
       ))}
+      {isIndoor && [-12, 0, 12].map((x) => (
+        <pointLight key={`club-light-${x}`} position={[x, 11.5, 0]} intensity={night ? 9 : 4} distance={28} color="#fff1d6" decay={2} />
+      ))}
 
-      <OutdoorEnvironment night={night} />
+      {isIndoor ? <IndoorClubEnvironment night={night} frameColor={frameColor} /> : <OutdoorEnvironment night={night} />}
       <group scale={[1, 1, courtWidthScale]}>
       <mesh position={[0, 0, 0]} receiveShadow castShadow>
         <boxGeometry args={[20.35, 0.16, 10.35]} />
@@ -224,7 +228,6 @@ function CourtScene({ night, court }: { night: boolean; court: CourtConfiguratio
       <Suspense fallback={null}><LogoSigns /></Suspense>
       <Floodlights night={night} type={court.lighting} frameColor={frameColor} />
       <mesh position={[0, 0.2, 0]}><sphereGeometry args={[0.12, 20, 20]} /><meshStandardMaterial color="#f2e955" roughness={0.35} /></mesh>
-      {court.courtType === 'indoor' && <IndoorRoof frameColor={frameColor} />}
       </group>
       <ContactShadows position={[0, -0.055, 0]} opacity={night ? 0.45 : 0.25} scale={28} blur={2.8} far={8} />
       <OrbitControls makeDefault target={[0, 1.2, 0]} minDistance={13} maxDistance={32} minPolarAngle={0.35} maxPolarAngle={1.42} enablePan={false} dampingFactor={0.08} />
@@ -292,14 +295,56 @@ function FenceSupports({ courtType, frameColor }: { courtType: CourtConfiguratio
   )
 }
 
-function IndoorRoof({ frameColor }: { frameColor: string }) {
+function IndoorClubEnvironment({ night, frameColor }: { night: boolean; frameColor: string }) {
+  const wallColor = night ? '#68736e' : '#d5d9d3'
+  const glassColor = night ? '#667b79' : '#9eaeaa'
+
   return (
     <group>
-      <mesh position={[0, 8.3, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[21, 10.8]} />
-        <meshPhysicalMaterial color="#d7dfd8" transparent opacity={0.22} roughness={0.5} metalness={0.08} depthWrite={false} side={DoubleSide} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.24, 0]} receiveShadow>
+        <planeGeometry args={[50, 44]} />
+        <meshStandardMaterial color={night ? '#646b66' : '#b8bdb7'} roughness={0.72} metalness={0.04} />
       </mesh>
-      {[-9, -4.5, 0, 4.5, 9].map((x) => <mesh key={`roof-rafter-${x}`} position={[x, 8.18, 0]}><boxGeometry args={[0.12, 0.12, 10.6]} /><meshStandardMaterial color={frameColor} metalness={0.42} roughness={0.48} /></mesh>)}
+      {[-1, 1].map((side) => <group key={`club-side-${side}`}>
+        <mesh position={[0, 6.5, side * 22]} receiveShadow>
+          <boxGeometry args={[50, 13, 0.28]} />
+          <meshStandardMaterial color={wallColor} roughness={0.8} />
+        </mesh>
+        <mesh position={[0, 1.35, side * 21.82]}>
+          <boxGeometry args={[50, 2.7, 0.08]} />
+          <meshStandardMaterial color={night ? '#34483f' : '#53685c'} roughness={0.75} />
+        </mesh>
+        {[-20, -10, 0, 10, 20].map((x) => <group key={`club-window-${side}-${x}`} position={[x, 8.1, side * 21.81]}>
+          <mesh><boxGeometry args={[5.3, 2.8, 0.08]} /><meshStandardMaterial color={glassColor} metalness={0.22} roughness={0.36} /></mesh>
+          <mesh position={[0, 0, side * 0.05]}><boxGeometry args={[0.09, 2.8, 0.04]} /><meshStandardMaterial color={frameColor} metalness={0.62} roughness={0.34} /></mesh>
+        </group>)}
+      </group>)}
+      {[-1, 1].map((end) => <group key={`club-end-${end}`}>
+        <mesh position={[end * 25, 6.5, 0]} receiveShadow>
+          <boxGeometry args={[0.28, 13, 44]} />
+          <meshStandardMaterial color={wallColor} roughness={0.8} />
+        </mesh>
+        <mesh position={[end * 24.82, 1.35, 0]}>
+          <boxGeometry args={[0.08, 2.7, 44]} />
+          <meshStandardMaterial color={night ? '#34483f' : '#53685c'} roughness={0.75} />
+        </mesh>
+      </group>)}
+      <mesh position={[0, 13, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[50, 44]} />
+        <meshStandardMaterial color={night ? '#89918c' : '#d5dbd7'} roughness={0.82} side={DoubleSide} />
+      </mesh>
+      {[-20, -10, 0, 10, 20].map((x) => <mesh key={`club-rafter-${x}`} position={[x, 12.82, 0]}>
+        <boxGeometry args={[0.18, 0.2, 42]} />
+        <meshStandardMaterial color={frameColor} metalness={0.48} roughness={0.42} />
+      </mesh>)}
+      {[-18, 0, 18].map((z) => <mesh key={`club-crossbeam-${z}`} position={[0, 12.82, z]}>
+        <boxGeometry args={[48, 0.2, 0.18]} />
+        <meshStandardMaterial color={frameColor} metalness={0.48} roughness={0.42} />
+      </mesh>)}
+      {[-15, -7.5, 0, 7.5, 15].map((x) => <mesh key={`club-luminaire-${x}`} position={[x, 12.62, 0]}>
+        <boxGeometry args={[0.2, 0.08, 7]} />
+        <meshStandardMaterial color="#f4f0df" emissive={night ? '#fff0c8' : '#fff7dd'} emissiveIntensity={night ? 1.1 : 0.45} />
+      </mesh>)}
     </group>
   )
 }
@@ -438,7 +483,7 @@ function App() {
 
   return (
     <main className={`experience${activeStep === null ? ' is-configurator-collapsed' : ''}`}>
-      <Canvas key={resetKey} className="court-canvas" shadows="percentage" dpr={[1, 1.8]} camera={{ position: [17.5, 14.5, 18.5], fov: 38, near: 0.1, far: 100 }} gl={{ antialias: true, powerPreference: 'high-performance' }}>
+      <Canvas key={`${resetKey}-${configuration.courtType === 'indoor' ? 'indoor' : 'outdoor'}`} className="court-canvas" shadows="percentage" dpr={[1, 1.8]} camera={{ position: configuration.courtType === 'indoor' ? [17.5, 10.5, 18.5] : [17.5, 14.5, 18.5], fov: configuration.courtType === 'indoor' ? 45 : 38, near: 0.1, far: configuration.courtType === 'indoor' ? 120 : 100 }} gl={{ antialias: true, powerPreference: 'high-performance' }}>
         <Suspense fallback={null}>
           <CourtScene night={night} court={configuration} />
         </Suspense>
