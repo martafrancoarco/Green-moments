@@ -404,50 +404,88 @@ function LogoSigns() {
   )
 }
 
+function createIngodeBraceGeometry() {
+  return new TubeGeometry(new CatmullRomCurve3([
+    new Vector3(0, 0.95, 0),
+    new Vector3(-0.46, 1.48, 0),
+    new Vector3(-0.46, 2.18, 0),
+  ]), 12, 0.045, 8, false)
+}
+
+function createCurvedArmGeometry() {
+  return new TubeGeometry(new CatmullRomCurve3([
+    new Vector3(0, 0.45, 0),
+    new Vector3(0.2, 1.8, 0),
+    new Vector3(-0.05, 3.15, 0),
+    new Vector3(-0.62, 4.35, 0),
+    new Vector3(-1.02, 5.45, 0),
+  ]), 32, 0.05, 8, false)
+}
+
+function FloodlightFixture({ night, type, frameColor, endDirection, ingodeBrace, curvedArm }: {
+  night: boolean
+  type: CourtConfiguration['lighting']
+  frameColor: string
+  endDirection: number
+  ingodeBrace: TubeGeometry
+  curvedArm: TubeGeometry
+}) {
+  return (
+    <group>
+      <mesh position={[0, 2.85, 0]}><cylinderGeometry args={[0.055, 0.085, 5.7, 10]} /><meshStandardMaterial color={frameColor} metalness={0.72} roughness={0.32} /></mesh>
+      {type === 'ingode' && <>
+        <mesh geometry={ingodeBrace} scale={[endDirection, 1, 1]}><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>
+        <mesh position={[-endDirection * 0.3, 5.48, 0]} rotation={[0, 0, endDirection * 0.12]}><boxGeometry args={[0.14, 0.72, 0.14]} /><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>
+        <mesh position={[-endDirection * 0.52, 5.8, 0]}><boxGeometry args={[0.72, 0.16, 0.34]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>
+      </>}
+      {type === 'curved' && <>
+        <mesh geometry={curvedArm} scale={[endDirection, 1, 1]}><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>
+        <mesh position={[-endDirection * 0.86, 5.72, 0]} rotation={[0, 0, endDirection * 0.08]}><boxGeometry args={[0.72, 0.16, 0.34]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>
+      </>}
+      {type === 'straight' && <mesh position={[-endDirection * 0.3, 5.8, 0]} rotation={[0, 0, endDirection * 0.11]}><boxGeometry args={[0.78, 0.16, 0.36]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>}
+    </group>
+  )
+}
+
 function Floodlights({ night, type, frameColor }: { night: boolean; type: CourtConfiguration['lighting']; frameColor: string }) {
-  const ingodeBrace = useMemo(() => new TubeGeometry(
-    new CatmullRomCurve3([
-      new Vector3(0, 0.95, 0),
-      new Vector3(-0.46, 1.48, 0),
-      new Vector3(-0.46, 2.18, 0),
-    ]),
-    12,
-    0.045,
-    8,
-    false,
-  ), [])
-  const curvedArm = useMemo(() => new TubeGeometry(
-    new CatmullRomCurve3([
-      new Vector3(0, 0.45, 0),
-      new Vector3(0.2, 1.8, 0),
-      new Vector3(-0.05, 3.15, 0),
-      new Vector3(-0.62, 4.35, 0),
-      new Vector3(-1.02, 5.45, 0),
-    ]),
-    32,
-    0.05,
-    8,
-    false,
-  ), [])
+  const ingodeBrace = useMemo(() => createIngodeBraceGeometry(), [])
+  const curvedArm = useMemo(() => createCurvedArmGeometry(), [])
 
   return (
     <group>
-      {[-1, 1].flatMap((end) => [-1, 1].map((side) => (
-        <group key={`flood-${end}-${side}`} position={[end * 10.85, 0, side * 5.9]}>
-          <mesh position={[0, 2.85, 0]}><cylinderGeometry args={[0.055, 0.085, 5.7, 10]} /><meshStandardMaterial color={frameColor} metalness={0.72} roughness={0.32} /></mesh>
-          {type === 'ingode' && <>
-            <mesh geometry={ingodeBrace} scale={[end, 1, 1]}><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>
-            <mesh position={[-end * 0.3, 5.48, 0]} rotation={[0, 0, end * 0.12]}><boxGeometry args={[0.14, 0.72, 0.14]} /><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>
-            <mesh position={[-end * 0.52, 5.8, 0]}><boxGeometry args={[0.72, 0.16, 0.34]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>
-          </>}
-          {type === 'curved' && <>
-            <mesh geometry={curvedArm} scale={[end, 1, 1]}><meshStandardMaterial color={frameColor} metalness={0.65} roughness={0.35} /></mesh>
-            <mesh position={[-end * 0.86, 5.72, 0]} rotation={[0, 0, end * 0.08]}><boxGeometry args={[0.72, 0.16, 0.34]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>
-          </>}
-          {type === 'straight' && <mesh position={[-end * 0.3, 5.8, 0]} rotation={[0, 0, end * 0.11]}><boxGeometry args={[0.78, 0.16, 0.36]} /><meshStandardMaterial color={night ? '#f3efcc' : '#68766d'} emissive={night ? '#fff1b7' : '#000000'} emissiveIntensity={night ? 2.1 : 0} /></mesh>}
+      {[-1, 1].flatMap((endDirection) => [-1, 1].map((sideDirection) => (
+        <group key={`flood-${endDirection}-${sideDirection}`} position={[endDirection * 10.85, 0, sideDirection * 5.9]}>
+          <FloodlightFixture night={night} type={type} frameColor={frameColor} endDirection={endDirection} ingodeBrace={ingodeBrace} curvedArm={curvedArm} />
         </group>
       )))}
     </group>
+  )
+}
+
+function LightingPreview({ type }: { type: CourtConfiguration['lighting'] }) {
+  const ingodeBrace = useMemo(() => createIngodeBraceGeometry(), [])
+  const curvedArm = useMemo(() => createCurvedArmGeometry(), [])
+
+  useEffect(() => () => {
+    ingodeBrace.dispose()
+    curvedArm.dispose()
+  }, [curvedArm, ingodeBrace])
+
+  return (
+    <div className="lighting-preview" aria-hidden="true">
+      <Canvas frameloop="demand" dpr={1} camera={{ position: [2.8, 3.2, 9], fov: 36, near: 0.1, far: 20 }}>
+        <color attach="background" args={['#e4e9e2']} />
+        <ambientLight intensity={1.2} />
+        <directionalLight position={[-3, 7, 5]} intensity={2.3} />
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.9, 0]}>
+          <planeGeometry args={[5, 4]} />
+          <meshStandardMaterial color="#d6ddd4" roughness={0.92} />
+        </mesh>
+        <group position={[0, -2.9, 0]}>
+          <FloodlightFixture night type={type} frameColor="#34483a" endDirection={1} ingodeBrace={ingodeBrace} curvedArm={curvedArm} />
+        </group>
+      </Canvas>
+    </div>
   )
 }
 
@@ -488,23 +526,6 @@ function App() {
     setActiveStep(0)
   }
 
-  function renderChoices<T extends { id: string; label: string; description: string }>(
-    options: readonly T[],
-    selectedId: string,
-    onSelect: (id: string) => void,
-  ) {
-    return (
-      <div className="choice-list">
-        {options.map((option) => (
-          <button key={option.id} className={`choice-card${selectedId === option.id ? ' is-selected' : ''}`} type="button" aria-pressed={selectedId === option.id} onClick={() => onSelect(option.id)}>
-            <span className="choice-check"><Check size={13} strokeWidth={2.4} /></span>
-            <span className="choice-copy"><strong>{option.label}</strong><small>{option.description}</small></span>
-          </button>
-        ))}
-      </div>
-    )
-  }
-
   function renderGrassChoices() {
     return (
       <div className="grass-choice-list">
@@ -512,6 +533,20 @@ function App() {
           <button key={option.id} className={`choice-card grass-choice-card${configuration.grassType === option.id ? ' is-selected' : ''}`} type="button" aria-pressed={configuration.grassType === option.id} onClick={() => updateConfiguration('grassType', option.id)}>
             <span className="grass-choice-image"><img src={`${import.meta.env.BASE_URL}${option.image}`} alt="" loading="lazy" /></span>
             <span className="choice-copy grass-choice-copy"><strong>{option.label}</strong><small>{option.description}</small></span>
+            <span className="choice-check"><Check size={13} strokeWidth={2.4} /></span>
+          </button>
+        ))}
+      </div>
+    )
+  }
+
+  function renderLightingChoices() {
+    return (
+      <div className="choice-list lighting-choice-list">
+        {lightingTypes.map((option) => (
+          <button key={option.id} className={`choice-card lighting-choice-card${configuration.lighting === option.id ? ' is-selected' : ''}`} type="button" aria-pressed={configuration.lighting === option.id} onClick={() => updateConfiguration('lighting', option.id)}>
+            <LightingPreview type={option.id} />
+            <span className="choice-copy lighting-choice-copy"><strong>{option.label}</strong><small>{option.description}</small></span>
             <span className="choice-check"><Check size={13} strokeWidth={2.4} /></span>
           </button>
         ))}
@@ -600,7 +635,7 @@ function App() {
               </>}
               {activeStep === 4 && <>
                 <div className="step-intro"><span>PASO 05 / 05</span><h2>¿Qué tipo de focos?</h2><p>Elige uno de los tres diseños del catálogo.</p></div>
-                {renderChoices(lightingTypes, configuration.lighting, (id) => updateConfiguration('lighting', id as CourtConfiguration['lighting']))}
+                {renderLightingChoices()}
               </>}
               {activeStep === 5 && <>
                 <div className="step-intro"><span>CONFIGURACIÓN COMPLETA</span><h2>Tu pista</h2><p>Revisa tu selección y solicita información.</p></div>
