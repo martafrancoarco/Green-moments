@@ -230,7 +230,7 @@ function CourtScene({ night, court }: { night: boolean; court: CourtConfiguratio
       <mesh position={[0, 0.2, 0]}><sphereGeometry args={[0.12, 20, 20]} /><meshStandardMaterial color="#f2e955" roughness={0.35} /></mesh>
       </group>
       <ContactShadows position={[0, -0.055, 0]} opacity={night ? 0.45 : 0.25} scale={28} blur={2.8} far={8} />
-      <OrbitControls makeDefault target={[0, 1.2, 0]} minDistance={13} maxDistance={32} minPolarAngle={0.35} maxPolarAngle={1.42} enablePan={false} dampingFactor={0.08} />
+      <OrbitControls makeDefault target={[0, 1.2, 0]} minDistance={13} maxDistance={isIndoor ? 19 : 32} minPolarAngle={isIndoor ? 0.95 : 0.35} maxPolarAngle={isIndoor ? 1.35 : 1.42} enablePan={false} dampingFactor={0.08} />
     </>
   )
 }
@@ -483,7 +483,7 @@ function App() {
 
   return (
     <main className={`experience${activeStep === null ? ' is-configurator-collapsed' : ''}`}>
-      <Canvas key={`${resetKey}-${configuration.courtType === 'indoor' ? 'indoor' : 'outdoor'}`} className="court-canvas" shadows="percentage" dpr={[1, 1.8]} camera={{ position: configuration.courtType === 'indoor' ? [17.5, 10.5, 18.5] : [17.5, 14.5, 18.5], fov: configuration.courtType === 'indoor' ? 45 : 38, near: 0.1, far: configuration.courtType === 'indoor' ? 120 : 100 }} gl={{ antialias: true, powerPreference: 'high-performance' }}>
+      <Canvas key={`${resetKey}-${configuration.courtType === 'indoor' ? 'indoor' : 'outdoor'}`} className="court-canvas" shadows="percentage" dpr={[1, 1.8]} camera={{ position: configuration.courtType === 'indoor' ? [12.2, 7.2, 12.2] : [17.5, 14.5, 18.5], fov: configuration.courtType === 'indoor' ? 62 : 38, near: 0.1, far: configuration.courtType === 'indoor' ? 120 : 100 }} gl={{ antialias: true, powerPreference: 'high-performance' }}>
         <Suspense fallback={null}>
           <CourtScene night={night} court={configuration} />
         </Suspense>
