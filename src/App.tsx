@@ -15,9 +15,9 @@ const courtTypes = [
 ] as const
 
 const grassTypes = [
-  { id: 'fibrillated', label: 'Césped fibrilado', description: 'Opción económica · requiere cepillado y mantenimiento regular.' },
-  { id: 'monofilament', label: 'Césped monofilamento', description: 'Más duradero · mantenimiento reducido · bote homogéneo.' },
-  { id: 'textured', label: 'Césped texturizado', description: 'Tacto suave y acabado mate · más indicado para zonas de ocio.' },
+  { id: 'vergel', label: 'Vergel', description: '35 mm · 18.900 puntadas · 2.910 g/m²', image: 'grass-vergel.webp', heightMm: 35, stitches: 18900 },
+  { id: 'vergel-plus', label: 'Vergel Plus', description: '40 mm · 29.400 puntadas · 2.414 g/m²', image: 'grass-vergel-plus.webp', heightMm: 40, stitches: 29400 },
+  { id: 'oasis', label: 'Oasis', description: '50 mm · 12.600 puntadas · 2.399 g/m²', image: 'grass-oasis.webp', heightMm: 50, stitches: 12600 },
 ] as const
 
 const grassColors = [
@@ -54,7 +54,7 @@ type CourtConfiguration = {
 
 const defaultCourtConfiguration: CourtConfiguration = {
   courtType: 'modular',
-  grassType: 'monofilament',
+  grassType: 'vergel-plus',
   grassColor: 'green',
   frameColor: 'black',
   lighting: 'straight',
@@ -64,39 +64,70 @@ const configurationSteps = ['Tipo de pista', 'Césped', 'Color', 'Estructura', '
 
 function createTurfTexture(colorId: CourtConfiguration['grassColor'], grassType: CourtConfiguration['grassType']) {
   const turfColor = grassColors.find((option) => option.id === colorId) ?? grassColors[1]
+  const turfModel = grassTypes.find((option) => option.id === grassType) ?? grassTypes[0]
   const canvas = document.createElement('canvas')
+  const bumpCanvas = document.createElement('canvas')
   canvas.width = 512
   canvas.height = 512
+  bumpCanvas.width = 512
+  bumpCanvas.height = 512
   const context = canvas.getContext('2d')
-  if (!context) return new CanvasTexture(canvas)
+  const bumpContext = bumpCanvas.getContext('2d')
+  if (!context || !bumpContext) return { map: new CanvasTexture(canvas), bumpMap: new CanvasTexture(bumpCanvas) }
 
-  context.fillStyle = turfColor.color
+  context.fillStyle = turfColor.dark
   context.fillRect(0, 0, canvas.width, canvas.height)
-  for (let index = 0; index < 9500; index += 1) {
-    const x = Math.random() * canvas.width
-    const y = Math.random() * canvas.height
-    context.strokeStyle = Math.random() > 0.5 ? turfColor.fiber : turfColor.dark
-    context.globalAlpha = grassType === 'textured' ? 0.18 + Math.random() * 0.2 : 0.22 + Math.random() * 0.32
-    context.lineWidth = grassType === 'fibrillated' ? 1.8 + Math.random() * 1.5 : grassType === 'textured' ? 1.5 + Math.random() * 1.8 : 1 + Math.random() * 1.2
-    context.beginPath()
-    context.moveTo(x, y)
-    if (grassType === 'textured') {
-      context.quadraticCurveTo(x + 4 + Math.random() * 5, y - 2, x + 1 + Math.random() * 4, y - 4 - Math.random() * 3)
-    } else {
-      const fiberLength = grassType === 'fibrillated' ? 3 + Math.random() * 5 : 5 + Math.random() * 8
-      context.lineTo(x + Math.random() * (grassType === 'fibrillated' ? 5 : 3), y - fiberLength)
+  bumpContext.fillStyle = '#777777'
+  bumpContext.fillRect(0, 0, bumpCanvas.width, bumpCanvas.height)
+  context.lineCap = 'round'
+  bumpContext.lineCap = 'round'
+
+  const averageFiberLength = turfModel.heightMm * 0.512
+  const strandsPerStitch = turfModel.id === 'vergel-plus' ? 2 : 3
+  const tuftCount = Math.ceil(turfModel.stitches * 0.1 / strandsPerStitch)
+  for (let stitch = 0; stitch < tuftCount; stitch += 1) {
+    const baseX = Math.random() * canvas.width
+    const baseY = Math.random() * canvas.height
+
+    for (let strand = 0; strand < strandsPerStitch; strand += 1) {
+      const startX = baseX + (Math.random() - 0.5) * 2.4
+      const startY = baseY + (Math.random() - 0.5) * 2.4
+      const lean = (Math.random() - 0.5) * 8
+      const fiberLength = averageFiberLength * (0.58 + Math.random() * 0.76)
+      const endX = startX + lean
+      const endY = startY - fiberLength
+      const width = 0.9 + Math.random() * 0.7
+
+      context.strokeStyle = Math.random() > 0.34 ? turfColor.fiber : turfColor.color
+      context.globalAlpha = 0.55 + Math.random() * 0.38
+      context.lineWidth = width
+      context.beginPath()
+      context.moveTo(startX, startY)
+      context.quadraticCurveTo(startX + lean * 0.3, startY - fiberLength * 0.52, endX, endY)
+      context.stroke()
+
+      bumpContext.strokeStyle = strand === 0 ? '#c7c7c7' : '#414141'
+      bumpContext.globalAlpha = 0.58 + Math.random() * 0.32
+      bumpContext.lineWidth = width
+      bumpContext.beginPath()
+      bumpContext.moveTo(startX, startY)
+      bumpContext.quadraticCurveTo(startX + lean * 0.3, startY - fiberLength * 0.52, endX, endY)
+      bumpContext.stroke()
     }
-    context.stroke()
   }
   context.globalAlpha = 1
+  bumpContext.globalAlpha = 1
 
-  const texture = new CanvasTexture(canvas)
-  texture.colorSpace = SRGBColorSpace
-  texture.wrapS = RepeatWrapping
-  texture.wrapT = RepeatWrapping
-  texture.repeat.set(19, 10)
-  texture.anisotropy = 8
-  return texture
+  const map = new CanvasTexture(canvas)
+  map.colorSpace = SRGBColorSpace
+  const bumpMap = new CanvasTexture(bumpCanvas)
+  for (const texture of [map, bumpMap]) {
+    texture.wrapS = RepeatWrapping
+    texture.wrapT = RepeatWrapping
+    texture.repeat.set(19, 10)
+    texture.anisotropy = 8
+  }
+  return { map, bumpMap }
 }
 
 function createPaverTexture() {
@@ -156,9 +187,15 @@ function createLandscapeTexture() {
 
 function CourtScene({ night, court }: { night: boolean; court: CourtConfiguration }) {
   const turf = useMemo(() => createTurfTexture(court.grassColor, court.grassType), [court.grassColor, court.grassType])
+  const turfModel = grassTypes.find((option) => option.id === court.grassType) ?? grassTypes[0]
   const frameColor = frameColors.find((option) => option.id === court.frameColor)?.color ?? '#242a27'
   const courtWidthScale = court.courtType === 'individual' ? 0.62 : 1
   const isIndoor = court.courtType === 'indoor'
+
+  useEffect(() => () => {
+    turf.map.dispose()
+    turf.bumpMap.dispose()
+  }, [turf])
 
   const fenceGeometry = useMemo(() => {
     const points: number[] = []
@@ -206,7 +243,7 @@ function CourtScene({ night, court }: { night: boolean; court: CourtConfiguratio
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.083, 0]} receiveShadow>
         <planeGeometry args={[20, 10]} />
-        <meshStandardMaterial map={turf} roughness={court.grassType === 'textured' ? 0.62 : court.grassType === 'monofilament' ? 0.82 : 0.95} />
+        <meshStandardMaterial map={turf.map} bumpMap={turf.bumpMap} bumpScale={turfModel.heightMm / 1000 * 0.42} roughness={0.94} />
       </mesh>
 
       <CourtLines />
@@ -468,6 +505,20 @@ function App() {
     )
   }
 
+  function renderGrassChoices() {
+    return (
+      <div className="grass-choice-list">
+        {grassTypes.map((option) => (
+          <button key={option.id} className={`choice-card grass-choice-card${configuration.grassType === option.id ? ' is-selected' : ''}`} type="button" aria-pressed={configuration.grassType === option.id} onClick={() => updateConfiguration('grassType', option.id)}>
+            <span className="grass-choice-image"><img src={`${import.meta.env.BASE_URL}${option.image}`} alt="" loading="lazy" /></span>
+            <span className="choice-copy grass-choice-copy"><strong>{option.label}</strong><small>{option.description}</small></span>
+            <span className="choice-check"><Check size={13} strokeWidth={2.4} /></span>
+          </button>
+        ))}
+      </div>
+    )
+  }
+
   function renderCourtChoices() {
     return (
       <div className="court-choice-grid">
@@ -532,8 +583,8 @@ function App() {
                 {renderCourtChoices()}
               </>}
               {activeStep === 1 && <>
-                <div className="step-intro"><span>PASO 02 / 05</span><h2>¿Qué césped prefieres?</h2><p>Elige entre las tres fibras disponibles para pádel.</p></div>
-                {renderChoices(grassTypes, configuration.grassType, (id) => updateConfiguration('grassType', id as CourtConfiguration['grassType']))}
+                <div className="step-intro"><span>PASO 02 / 05</span><h2>¿Qué césped prefieres?</h2><p>Elige entre los modelos de césped de Green Moments.</p></div>
+                {renderGrassChoices()}
               </>}
               {activeStep === 2 && <>
                 <div className="step-intro"><span>PASO 03 / 05</span><h2>Elige el color del césped</h2><p>La pista se actualiza al instante.</p></div>

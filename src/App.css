@@ -342,6 +342,12 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
 .choice-copy { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
 .choice-copy strong { font-size: 12px; line-height: 1.25; font-weight: 600; }
 .choice-copy small { color: #748075; font-size: 9px; line-height: 1.4; }
+.grass-choice-card { min-height: 78px; gap: 11px; padding: 8px 11px; }
+.grass-choice-image { display: block; width: 88px; height: 60px; flex: 0 0 88px; overflow: hidden; border-radius: 2px; background: #203a27; }
+.grass-choice-image img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 54%; }
+.grass-choice-copy { flex: 1 1 auto; }
+.grass-choice-copy strong { text-transform: none; }
+.grass-choice-copy small { font-size: 9px; font-variant-numeric: tabular-nums; }
 .swatch-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .swatch-option { display: flex; min-width: 0; min-height: 76px; flex-direction: column; align-items: flex-start; gap: 6px; padding: 7px; border: 1px solid #e0e5de; border-radius: 3px; color: #566457; background: rgba(255,255,255,.72); text-align: left; cursor: pointer; transition: border-color .18s ease, background .18s ease; }
 .swatch-option:hover { border-color: #9bb29b; background: #fff; }
@@ -385,6 +391,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid #4b815b; outline-offs
   .step-intro p { font-size: 10px; }
   .choice-list { gap: 7px; }
   .choice-card { min-height: 58px; padding: 10px; }
+  .grass-choice-card { min-height: 72px; gap: 8px; padding: 7px; }
+  .grass-choice-image { width: 72px; height: 54px; flex-basis: 72px; }
+  .grass-choice-copy small { font-size: 8px; }
   .court-choice-grid { gap: 7px; }
   .court-model-copy { min-height: 57px; padding: 7px; }
   .court-model-copy strong { font-size: 10px; }
